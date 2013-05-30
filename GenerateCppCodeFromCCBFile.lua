@@ -1,8 +1,9 @@
 package.path = package.path .. ';.;'
+local arg = arg or {};
 local filename = FILENAME or arg[1]
 local classname = CLASSNAME or arg[2]
-local outputfilename = OUTPUTFILNAME or classname
-local outputpath = OUTPUTPATH or ''
+local outputfilename = OUTPUTFILENAME or arg[3] or classname
+local outputpath = OUTPUTPATH or arg[4] or ''
 local dir = DIR or '';
 
 local showlog = showlog or print;
