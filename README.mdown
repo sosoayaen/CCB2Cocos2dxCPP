@@ -1,0 +1,63 @@
+CCBGenerateCppBindCode
+===========
+
+  本脚本是用作自动生成CCB[cocosbuilder]文件到对应C++的数据绑定，使用lua
+  当前支持的cocos2dx的版本为 2.1.2 及以上
+  当前支持的cocosbuilder版本为 3.0 Alpha3 及以上
+
+Supported Platforms
+------------------
+  只要能跑lua的都可以，装好lua后（推荐使用lua5.1.4），在命令行下调用此脚本即可，具体见使用说明
+  [http://www.lua.org]
+
+Usage
+-------------------
+lua GenerateCppCodeFromCCBFile.lua ccbFilePath ClassName
+  * ccbFilePath 这个是对应的要解析的ccb文件位置
+  * ClassName 要生成的C++类的名称，最后会生成 ClassName.h 和 ClassName.cpp 两个文件
+  示例：lua GenerateCppCodeFromCCBFile.lua RoomSelecLayer.ccb HallScene
+
+现在提供一个shell来简化
+-------------------
+  * Win32 gen.bat, 在win32下在命令行下执行gen ccbfile ClassName
+  * OSX   gen.sh 在MAC系统下，执行./gen.sh ccbfile ClassName
+  * Linux gen.sh 在Linux系统下提供和OSX上一样的脚本
+  
+GUI支持
+-------------------
+  * Win32 平台下现在有提供一个shell来调用对应的脚本，可以指定对应的输入文件和输出类名以及输出文件名
+
+CCB Rules
+-------------------
+编辑CCB文件（使用CocosBuilder）时，对绑定变量的命名规范有要求
+
+Member bind
+------------
+  如果是对象绑定到类的成员变量，则必须满足以下要求
+  * m_pClassName
+  示例：m_pSpriteBackground。
+  其中，最好以m_p开头，表示是一个指针类型的成员变量。
+  后面的Class这里为Sprite，请注意，必须以C++中对应的类名称去掉CC前缀，即CCSprite写成Sprite，如果是CCMenu则为Menu，依次类推
+  最后的Name可以任意取名，比如这里的Background即可。
+  这通常表示一个背景精灵对象
+  
+Menu Selector bind
+------------
+  如果是菜单回调，则要满足以下规则
+  * onPressMenuSelectorName
+  示例：onPressMenuLogin
+  其中，必须以onPressMenu开头，这是脚本解析命令的关键词！
+  后面的SelectorName即为示例中的Login，一般表示这是一个按了界面上的登录按钮的函数回调
+  
+ControlButton Selector bind
+------------
+  按钮的回调，需要满足以下规则
+  * onPressControlSelectorName
+  示例：onPressControlLoginButton
+  其中，必须以onPressControl开头，这是脚本解析命令的关键词！
+  后面的LoginButton就是对应SelectorName段，一般从命名上可以看出来是在界面上按了登录的按钮发生的回调响应
+  
+Callback Function bind
+------------
+  目前项目中暂时没有用到，尚未实现
+  
