@@ -1,4 +1,10 @@
-package.path = package.path .. ';.;'
+package.path = package.path .. ';.\\?.lua;'
+
+-- 加载外部的配置脚本
+require 'config'
+
+local smartMatchTypeTbl = smartMatchTypeTbl;
+
 local arg = arg or {};
 local filename = FILENAME or arg[1]
 local classname = CLASSNAME or arg[2]
@@ -23,18 +29,6 @@ if not classname or classname == "" then
 	showlog("class is not given...");
 	return
 end
-
--- 智能类型匹配列表，最终生成到h和cpp文件中会以CCxxx展现，如CCMenu
-local smartMatchTypeTbl =
-{
-	"Menu",		-- 菜单
-	"Sprite",	-- 精灵
-	"Layer",	-- 层
-	"Node", 	-- 节点
-	"MenuItem", -- 菜单选项
-	"LabelTTF", -- 显示文字控件
-}
-
 
 -- 先找到memberVarAssignmentName，然后把string取出来
 local file = io.open(filename, 'r+b');
@@ -132,6 +126,7 @@ if file then
 		for idx, types in ipairs(smartMatchTypeTbl) do
 			if string.find(member, types) then
 				-- 这里可以加入一个判断是否是扩展类型的判断
+				print(member, types);
 				varType = types;
 				break;
 			end
@@ -179,10 +174,11 @@ if file then
 		table.insert(controlSelectorCallbackTbl, string.format(controlCallBackTbp, classname, ms));
 	end
 	
+	local ccbfilename = string.match(filename, '\\([%w_]+\.ccb)$');
 	-- 方便后来一次性替换的临时数据表格
 	local DataCache =
 	{
-		['$ccbifilename'] = filename .. 'i';		-- ccbi文件名称
+		['$ccbifilename'] = ccbfilename .. 'i';		-- ccbi文件名称
 		['$classname'] = classname;					-- 当前类名称
 		['$CLASSNAME'] = string.upper(classname);	-- 用作文件包含宏定义的名称
 		['$DATE'] = os.date("%Y-%m-%d %H:%M:%S", os.time());	-- 当前文件生成日期
