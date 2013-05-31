@@ -10,6 +10,8 @@ local filename = FILENAME or arg[1]
 local classname = CLASSNAME or arg[2]
 local outputfilename = OUTPUTFILENAME or arg[3] or classname
 local outputpath = OUTPUTPATH or arg[4] or ''
+local inheritclass = INHERITCLASS or arg[5] or "CCLayer" 	-- 默认继承自CCLayer
+local supportAndroidMenuReturn = SUPPORT_ANDROID_MENU_RETURN or arg[6]
 local dir = DIR or '';
 
 local showlog = showlog or print;
@@ -182,8 +184,9 @@ if file then
 		['$classname'] = classname;					-- 当前类名称
 		['$CLASSNAME'] = string.upper(classname);	-- 用作文件包含宏定义的名称
 		['$DATE'] = os.date("%Y-%m-%d %H:%M:%S", os.time());	-- 当前文件生成日期
+		['$inheritclass'] = inheritclass;	-- 继承的类
 		['$memberInit'] = table.concat(initCodeTbl);	-- 初始化代码
-		
+				
 		['$bindMemberVariableDeclare'] = table.concat(memberVariableDeclareTbl);	-- 成员变量定义
 		['$bindMemberVariable'] = table.concat(memberVariableBindTbl);	-- 成员变量绑定
 		
@@ -198,7 +201,30 @@ if file then
 		['$bindCallfuncSelectorDeclare'] = '';	-- 暂时未实现
 		['$bindCallfuncSelector'] = '';	-- 暂时未实现
 		['$callfuncSelectorCallback'] = '';	-- 暂时未实现
+		
+		['$setKeypadEnabled'] = "";
+		['$androidMenuReturnCallback'] = "";
+		['$keyMenuAndBackFunctionDeclare'] = "";
 	}
+	
+	if supportAndroidMenuReturn then
+		DataCache['$setKeypadEnabled'] = "setKeypadEnabled(true);";
+		local tmpTpl = [[void %s::keyBackClicked( void )
+{
+	// TODO:
+}
+
+void %s::keyMenuClicked( void )
+{
+	// TODO:
+}
+]];
+		DataCache['$androidMenuReturnCallback'] = string.format(tmpTpl, classname, classname);
+		DataCache['$keyMenuAndBackFunctionDeclare'] = [[
+	virtual void keyBackClicked( void );
+	virtual void keyMenuClicked( void );
+]]
+	end
 	
 	--[[
 		这里开始生成头文件

@@ -42,6 +42,8 @@ bool $classname::init()
 		
 		bRet = true;
 		
+		$setKeypadEnabled
+		
 	} while(0);
 	
 	return bRet;
@@ -82,3 +84,5 @@ $menuSelectorCallback
 $controlSelectorCallback
 
 $callfuncSelectorCallback
+
+$androidMenuReturnCallback

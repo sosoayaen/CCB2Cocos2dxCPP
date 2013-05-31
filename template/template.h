@@ -43,6 +43,7 @@ public:
 	// Virtual Functions
 	virtual bool init();
 	virtual void onEnter();
+$keyMenuAndBackFunctionDeclare
 	
 public:
 	// Funcitons
