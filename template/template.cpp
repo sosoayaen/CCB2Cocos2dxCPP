@@ -13,7 +13,7 @@ bool $classname::init()
 	bool bRet = false;
 	do
 	{
-		CC_BREAK_IF(!CCLayer::init());
+		CC_BREAK_IF(!$inheritclass::init());
 		// º”‘ÿccbi
 		CCNodeLoaderLibrary* pLoaderLib = CCNodeLoaderLibrary::newDefaultCCNodeLoaderLibrary();
 
@@ -49,7 +49,7 @@ bool $classname::init()
 
 void $classname::onEnter()
 {
-	CCLayer::onEnter();
+	$inheritclass::onEnter();
 	// TODO:
 }
 

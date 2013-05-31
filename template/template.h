@@ -5,14 +5,14 @@
 * Date: $DATE
 */
 
-#ifndef __$CLASSNAME__H
-#define __$CLASSNAME__H
+#ifndef __$CLASSNAME__H__
+#define __$CLASSNAME__H__
 
 #include "cocos2d.h"
 #include "cocos-ext.h"
 
 class $classname:
-	public cocos2d::CCLayer,
+	public cocos2d::$inheritclass,
 	public cocos2d::extension::CCBSelectorResolver,
 	public cocos2d::extension::CCBMemberVariableAssigner
 {
@@ -53,4 +53,4 @@ $bindControlSelectorDeclare
 $bindCallfuncSelectorDeclare
 };
 
-#endif // __$CLASSNAME__H
+#endif // __$CLASSNAME__H__

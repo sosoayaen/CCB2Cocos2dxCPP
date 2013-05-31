@@ -8,3 +8,11 @@ smartMatchTypeTbl =
 	"Node", 	-- 节点
 	"LabelTTF", -- 显示文字控件
 }
+
+-- WIN32 的GUI中选择基类的ComboBox的下拉列表内容
+InheritClass =
+{
+	"CCLayer",
+	"CCColorLayer",
+	"DialogLayer",
+}
