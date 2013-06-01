@@ -25,7 +25,7 @@ lua GenerateCppCodeFromCCBFile.lua ccbFilePath ClassName
   
 GUI支持
 -------------------
-  * Win32 平台下现在有提供一个shell来调用对应的脚本，可以指定对应的输入文件和输出类名以及输出文件名
+  * Win32 平台下现在有提供一个shell来调用对应的脚本，可以指定对应的输入文件和输出类名以及输出文件名等等(Win32上只在XP和WIN7上试过可用，其他版本的操作系统尚未验证）
 
 CCB Rules
 -------------------
