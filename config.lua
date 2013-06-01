@@ -1,15 +1,15 @@
--- ÖÇÄÜÀàÐÍÆ¥ÅäÁÐ±í£¬×îÖÕÉú³Éµ½hºÍcppÎÄ¼þÖÐ»áÒÔCCxxxÕ¹ÏÖ£¬ÈçCCMenu
+-- æ™ºèƒ½ç±»åž‹åŒ¹é…åˆ—è¡¨ï¼Œæœ€ç»ˆç”Ÿæˆåˆ°hå’Œcppæ–‡ä»¶ä¸­ä¼šä»¥CCxxxå±•çŽ°ï¼Œå¦‚CCMenu
 smartMatchTypeTbl =
 {
-	"MenuItem", -- ²Ëµ¥Ñ¡Ïî
-	"Menu",		-- ²Ëµ¥
-	"Sprite",	-- ¾«Áé
-	"Layer",	-- ²ã
-	"Node", 	-- ½Úµã
-	"LabelTTF", -- ÏÔÊ¾ÎÄ×Ö¿Ø¼þ
+	"MenuItem", -- èœå•é€‰é¡¹
+	"Menu",		-- èœå•
+	"Sprite",	-- ç²¾çµ
+	"Layer",	-- å±‚
+	"Node", 	-- èŠ‚ç‚¹
+	"LabelTTF", -- æ˜¾ç¤ºæ–‡å­—æŽ§ä»¶
 }
 
--- WIN32 µÄGUIÖÐÑ¡Ôñ»ùÀàµÄComboBoxµÄÏÂÀ­ÁÐ±íÄÚÈÝ
+-- WIN32 çš„GUIä¸­é€‰æ‹©åŸºç±»çš„ComboBoxçš„ä¸‹æ‹‰åˆ—è¡¨å†…å®¹
 InheritClass =
 {
 	"CCLayer",

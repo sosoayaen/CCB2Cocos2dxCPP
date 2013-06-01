@@ -1,6 +1,6 @@
 package.path = package.path .. ';.\\?.lua;'
 
--- ¼ÓÔØÍâ²¿µÄÅäÖÃ½Å±¾
+-- åŠ è½½å¤–éƒ¨çš„é…ç½®è„šæœ¬
 require 'config'
 
 local smartMatchTypeTbl = smartMatchTypeTbl;
@@ -10,7 +10,7 @@ local filename = FILENAME or arg[1]
 local classname = CLASSNAME or arg[2]
 local outputfilename = OUTPUTFILENAME or arg[3] or classname
 local outputpath = OUTPUTPATH or arg[4] or ''
-local inheritclass = INHERITCLASS or arg[5] or "CCLayer" 	-- Ä¬ÈÏ¼Ì³Ğ×ÔCCLayer
+local inheritclass = INHERITCLASS or arg[5] or "CCLayer" 	-- é»˜è®¤ç»§æ‰¿è‡ªCCLayer
 local supportAndroidMenuReturn = SUPPORT_ANDROID_MENU_RETURN or arg[6]
 local dir = DIR or '';
 
@@ -32,25 +32,25 @@ if not classname or classname == "" then
 	return
 end
 
--- ÏÈÕÒµ½memberVarAssignmentName£¬È»ºó°ÑstringÈ¡³öÀ´
+-- å…ˆæ‰¾åˆ°memberVarAssignmentNameï¼Œç„¶åæŠŠstringå–å‡ºæ¥
 local file = io.open(filename, 'r+b');
 
 if file then
-	-- ÏÈ¶ÁÈëµ½ÄÚ´æ
+	-- å…ˆè¯»å…¥åˆ°å†…å­˜
 	local lineData = file:read("*l");
 	local varAssignmentFlag = false;
 	local varAssignmentTbl = {};
 	local menuSelectorTbl = {};
 	local controlSelectorTbl = {};
 	local lineCnt = 1;
-	-- Êı¾İ½âÎö²¿·Ö£¬´ÓccbÎÄ¼şÖĞ×¥È¡ĞèÒªµÄÊı¾İ
+	-- æ•°æ®è§£æéƒ¨åˆ†ï¼Œä»ccbæ–‡ä»¶ä¸­æŠ“å–éœ€è¦çš„æ•°æ®
 	while lineData do
 		repeat
 			if lineData == '' then
 				break
 			end
 			
-			-- ÅĞ¶ÏÊÇ·ñÊÇÓĞ±äÁ¿°ó¶¨
+			-- åˆ¤æ–­æ˜¯å¦æ˜¯æœ‰å˜é‡ç»‘å®š
 			if varAssignmentFlag then
 				local memberName = string.match(lineData, "<string>([%w_]-)</string>");
 				if memberName and memberName ~= "" then
@@ -60,7 +60,7 @@ if file then
 				break;
 			end
 			
-			-- ÅĞ¶ÏÊÇ·ñÓĞ onPress ¹Ø¼ü×Ö£¨ÕâÀï½¨ÒéccbÖĞ»Øµ÷Ğ¯³ÌonPressMenuµÈ£¬±ÜÃâ×¥È¡´íÎó£©
+			-- åˆ¤æ–­æ˜¯å¦æœ‰ onPress å…³é”®å­—ï¼ˆè¿™é‡Œå»ºè®®ccbä¸­å›è°ƒæºç¨‹onPressMenuç­‰ï¼Œé¿å…æŠ“å–é”™è¯¯ï¼‰
 			local menuSelector = string.match(lineData, "(onPressMenu[^<]+)");
 			if menuSelector then
 				table.insert(menuSelectorTbl, menuSelector);
@@ -71,10 +71,10 @@ if file then
 				table.insert(controlSelectorTbl, controlSelector);
 			end
 			
-			-- ¼ì²éµ±Ç°ĞĞÊı¾İÊÇ·ñÓĞmemberVarAssignmentName×Ö¶Î
+			-- æ£€æŸ¥å½“å‰è¡Œæ•°æ®æ˜¯å¦æœ‰memberVarAssignmentNameå­—æ®µ
 			if string.find(lineData, "memberVarAssignmentName") then
 --				showlog("find", "lineNum is ", lineCnt);
-				-- ÏÂÒ»ĞĞÊı¾İÎª°ó¶¨±äÁ¿
+				-- ä¸‹ä¸€è¡Œæ•°æ®ä¸ºç»‘å®šå˜é‡
 				varAssignmentFlag = true;
 				
 				break;
@@ -97,37 +97,37 @@ if file then
 		showlog(value);
 	end);
 	
-	-- Ô¤´¦ÀíÊı¾İ
-	-- ³õÊ¼»¯Êı¾İh
+	-- é¢„å¤„ç†æ•°æ®
+	-- åˆå§‹åŒ–æ•°æ®h
 	local initCodeTbl = {};
-	-- Êı¾İ¶¨Òå±íh
+	-- æ•°æ®å®šä¹‰è¡¨h
 	local memberVariableDeclareTbl = {};
-	-- Êı¾İ°ó¶¨±ícpp
+	-- æ•°æ®ç»‘å®šè¡¨cpp
 	local memberVariableBindTbl = {};
-	-- ²Ëµ¥»Øµ÷º¯ÊıÔ­ĞÍh
+	-- èœå•å›è°ƒå‡½æ•°åŸå‹h
 	local menuSelectorDeclareTbl = {};
-	-- ²Ëµ¥»Øµ÷°ó¶¨cpp
+	-- èœå•å›è°ƒç»‘å®šcpp
 	local menuSelectorBindTbl = {};
-	-- ²Ëµ¥»Øµ÷º¯ÊıÊµÏÖ
+	-- èœå•å›è°ƒå‡½æ•°å®ç°
 	local menuSelectorCallbackTbl = {};
-	-- Control»Øµ÷º¯ÊıÔ­ĞÍh
+	-- Controlå›è°ƒå‡½æ•°åŸå‹h
 	local controlSelectorDeclareTbl = {};
-	-- Control»Øµ÷°ó¶¨cpp
+	-- Controlå›è°ƒç»‘å®šcpp
 	local controlSelectorBindTbl = {};
-	-- Control»Øµ÷º¯ÊıÊµÏÖcpp
+	-- Controlå›è°ƒå‡½æ•°å®ç°cpp
 	local controlSelectorCallbackTbl = {};
 	
-	-- ³ÉÔ±±äÁ¿°ó¶¨
+	-- æˆå‘˜å˜é‡ç»‘å®š
 	for idx, member in ipairs(varAssignmentTbl) do
-		-- Éú³É³õÊ¼»¯´úÂë
+		-- ç”Ÿæˆåˆå§‹åŒ–ä»£ç 
 		table.insert(initCodeTbl, string.format("\t\t%s = NULL;\n", member));
 		
-		-- ÅĞ¶ÏÊÇÊ²Ã´ÀàĞÍµÄÊı¾İ
+		-- åˆ¤æ–­æ˜¯ä»€ä¹ˆç±»å‹çš„æ•°æ®
 		local varType = 'unKnowType';
 		local extension = '';
 		for idx, types in ipairs(smartMatchTypeTbl) do
 			if string.find(member, types) then
-				-- ÕâÀï¿ÉÒÔ¼ÓÈëÒ»¸öÅĞ¶ÏÊÇ·ñÊÇÀ©Õ¹ÀàĞÍµÄÅĞ¶Ï
+				-- è¿™é‡Œå¯ä»¥åŠ å…¥ä¸€ä¸ªåˆ¤æ–­æ˜¯å¦æ˜¯æ‰©å±•ç±»å‹çš„åˆ¤æ–­
 				print(member, types);
 				varType = types;
 				break;
@@ -135,7 +135,7 @@ if file then
 		end
 		table.insert(memberVariableDeclareTbl, string.format('\tcocos2d::%sCC%s* %s;\n', extension, varType, member));
 		
-		-- Éú³É°ó¶¨³ÉÔ±´úÂë
+		-- ç”Ÿæˆç»‘å®šæˆå‘˜ä»£ç 
 		table.insert(memberVariableBindTbl,
 			string.format('\tCCB_MEMBERVARIABLEASSIGNER_GLUE(this, "%s", CC%s*, this->%s);\n',
 			member, varType, member));
@@ -148,14 +148,14 @@ if file then
 }
 
 ]]
-	-- ²Ëµ¥»Øµ÷°ó¶¨
+	-- èœå•å›è°ƒç»‘å®š
 	for idx, ms in ipairs(menuSelectorTbl) do
-		-- Éú³É²Ëµ¥»Øµ÷ÉùÃ÷
+		-- ç”Ÿæˆèœå•å›è°ƒå£°æ˜
 		table.insert(menuSelectorDeclareTbl, string.format('\tvoid %s(cocos2d::CCObject* pSender);\n', ms));
-		-- Éú³É²Ëµ¥»Øµ÷°ó¶¨
+		-- ç”Ÿæˆèœå•å›è°ƒç»‘å®š
 		table.insert(menuSelectorBindTbl, 
 			string.format('\tCCB_SELECTORRESOLVER_CCMENUITEM_GLUE(this, "%s", %s::%s);\n', ms, classname, ms));
-		-- Éú³É¶ÔÓ¦²Ëµ¥»Øµ÷º¯ÊıÊµÏÖ´úÂë
+		-- ç”Ÿæˆå¯¹åº”èœå•å›è°ƒå‡½æ•°å®ç°ä»£ç 
 		table.insert(menuSelectorCallbackTbl, string.format(menuCallBackTpl, classname, ms));
 	end
 	
@@ -165,42 +165,42 @@ if file then
 }
 
 ]]
-	-- Control »Øµ÷°ó¶¨
+	-- Control å›è°ƒç»‘å®š
 	for idx, cs in ipairs(controlSelectorTbl) do
-		-- Éú³Écontrol»Øµ÷ÉùÃ÷
+		-- ç”Ÿæˆcontrolå›è°ƒå£°æ˜
 		table.insert(controlSelectorDeclareTbl, string.format('\tvoid %s(cocos2d::CCObject* pSender, cocos2d::extension::CCControlEvent event);\n', cs));
-		-- Éú³Écontrol»Øµ÷°ó¶¨
+		-- ç”Ÿæˆcontrolå›è°ƒç»‘å®š
 		table.insert(controlSelectorBindTbl,
 			string.format('\tCCB_SELECTORRESOLVER_CCCONTROL_GLUE(this, "%s", %s::%s);\n', cs, classname, cs));
-		-- Éú³É¶ÔÓ¦°´Å¥»Øµ÷º¯ÊıÊµÏÖ´úÂë
+		-- ç”Ÿæˆå¯¹åº”æŒ‰é’®å›è°ƒå‡½æ•°å®ç°ä»£ç 
 		table.insert(controlSelectorCallbackTbl, string.format(controlCallBackTbp, classname, ms));
 	end
 	
 	local ccbfilename = string.match(filename, '\\([%w_]+\.ccb)$');
-	-- ·½±ãºóÀ´Ò»´ÎĞÔÌæ»»µÄÁÙÊ±Êı¾İ±í¸ñ
+	-- æ–¹ä¾¿åæ¥ä¸€æ¬¡æ€§æ›¿æ¢çš„ä¸´æ—¶æ•°æ®è¡¨æ ¼
 	local DataCache =
 	{
-		['$ccbifilename'] = ccbfilename .. 'i';		-- ccbiÎÄ¼şÃû³Æ
-		['$classname'] = classname;					-- µ±Ç°ÀàÃû³Æ
-		['$CLASSNAME'] = string.upper(classname);	-- ÓÃ×÷ÎÄ¼ş°üº¬ºê¶¨ÒåµÄÃû³Æ
-		['$DATE'] = os.date("%Y-%m-%d %H:%M:%S", os.time());	-- µ±Ç°ÎÄ¼şÉú³ÉÈÕÆÚ
-		['$inheritclass'] = inheritclass;	-- ¼Ì³ĞµÄÀà
-		['$memberInit'] = table.concat(initCodeTbl);	-- ³õÊ¼»¯´úÂë
+		['$ccbifilename'] = ccbfilename .. 'i';		-- ccbiæ–‡ä»¶åç§°
+		['$classname'] = classname;					-- å½“å‰ç±»åç§°
+		['$CLASSNAME'] = string.upper(classname);	-- ç”¨ä½œæ–‡ä»¶åŒ…å«å®å®šä¹‰çš„åç§°
+		['$DATE'] = os.date("%Y-%m-%d %H:%M:%S", os.time());	-- å½“å‰æ–‡ä»¶ç”Ÿæˆæ—¥æœŸ
+		['$inheritclass'] = inheritclass;	-- ç»§æ‰¿çš„ç±»
+		['$memberInit'] = table.concat(initCodeTbl);	-- åˆå§‹åŒ–ä»£ç 
 				
-		['$bindMemberVariableDeclare'] = table.concat(memberVariableDeclareTbl);	-- ³ÉÔ±±äÁ¿¶¨Òå
-		['$bindMemberVariable'] = table.concat(memberVariableBindTbl);	-- ³ÉÔ±±äÁ¿°ó¶¨
+		['$bindMemberVariableDeclare'] = table.concat(memberVariableDeclareTbl);	-- æˆå‘˜å˜é‡å®šä¹‰
+		['$bindMemberVariable'] = table.concat(memberVariableBindTbl);	-- æˆå‘˜å˜é‡ç»‘å®š
 		
-		['$bindMenuSelectorDeclare'] = table.concat(menuSelectorDeclareTbl);	-- ²Ëµ¥»Øµ÷º¯Êı¶¨Òå
-		['$bindMenuSelector'] = table.concat(menuSelectorBindTbl);	-- ²Ëµ¥»Øµ÷º¯Êı°ó¶¨
-		['$menuSelectorCallback'] = table.concat(menuSelectorCallbackTbl);	-- cppÖĞ²Ëµ¥»Øµ÷µÄÊµÏÖ
+		['$bindMenuSelectorDeclare'] = table.concat(menuSelectorDeclareTbl);	-- èœå•å›è°ƒå‡½æ•°å®šä¹‰
+		['$bindMenuSelector'] = table.concat(menuSelectorBindTbl);	-- èœå•å›è°ƒå‡½æ•°ç»‘å®š
+		['$menuSelectorCallback'] = table.concat(menuSelectorCallbackTbl);	-- cppä¸­èœå•å›è°ƒçš„å®ç°
 		
-		['$bindControlSelectorDeclare'] = table.concat(controlSelectorDeclareTbl); -- control»Øµ÷º¯Êı¶¨Òå
-		['$bindControlSelector'] = table.concat(controlSelectorBindTbl); -- cppÖĞ»Øµ÷º¯Êı°ó¶¨
-		['$controlSelectorCallback'] = table.concat(controlSelectorCallbackTbl); -- cppÖĞ»Øµ÷º¯ÊıÊµÏÖ´úÂë
+		['$bindControlSelectorDeclare'] = table.concat(controlSelectorDeclareTbl); -- controlå›è°ƒå‡½æ•°å®šä¹‰
+		['$bindControlSelector'] = table.concat(controlSelectorBindTbl); -- cppä¸­å›è°ƒå‡½æ•°ç»‘å®š
+		['$controlSelectorCallback'] = table.concat(controlSelectorCallbackTbl); -- cppä¸­å›è°ƒå‡½æ•°å®ç°ä»£ç 
 	
-		['$bindCallfuncSelectorDeclare'] = '';	-- ÔİÊ±Î´ÊµÏÖ
-		['$bindCallfuncSelector'] = '';	-- ÔİÊ±Î´ÊµÏÖ
-		['$callfuncSelectorCallback'] = '';	-- ÔİÊ±Î´ÊµÏÖ
+		['$bindCallfuncSelectorDeclare'] = '';	-- æš‚æ—¶æœªå®ç°
+		['$bindCallfuncSelector'] = '';	-- æš‚æ—¶æœªå®ç°
+		['$callfuncSelectorCallback'] = '';	-- æš‚æ—¶æœªå®ç°
 		
 		['$setKeypadEnabled'] = "";
 		['$androidMenuReturnCallback'] = "";
@@ -227,14 +227,14 @@ void %s::keyMenuClicked( void )
 	end
 	
 	--[[
-		ÕâÀï¿ªÊ¼Éú³ÉÍ·ÎÄ¼ş
+		è¿™é‡Œå¼€å§‹ç”Ÿæˆå¤´æ–‡ä»¶
 	]]
 	showlog(string.format("++++++++++ Generate sample data file [%s.h] ", classname));
 	local hfilename = outputpath .. outputfilename .. ".h";
 
 	local hfile = io.open(hfilename, 'w+b');
 	if hfile then
-		-- ÔØÈëÍ·ÎÄ¼şÄ£°å
+		-- è½½å…¥å¤´æ–‡ä»¶æ¨¡æ¿
 		local templatehfile = io.open(dir .. 'template/template.h', 'r+b');
 --		error(tostring(templatehfile))
 		local templatehdata = nil;
@@ -244,10 +244,10 @@ void %s::keyMenuClicked( void )
 		end
 			
 		if templatehdata then
-			-- Éú³ÉÍ·ÎÄ¼şÊı¾İ
+			-- ç”Ÿæˆå¤´æ–‡ä»¶æ•°æ®
 			templatehdata = string.gsub(templatehdata, "($[%w]+)", DataCache);
 			
-			-- µ¼³öÍ·ÎÄ¼ş
+			-- å¯¼å‡ºå¤´æ–‡ä»¶
 			hfile:write(templatehdata);
 		end
 		
@@ -257,14 +257,14 @@ void %s::keyMenuClicked( void )
 	end
 	
 	--[[
-		ÕâÀï¿ªÊ¼Éú³ÉcppÔ´ÎÄ¼ş
+		è¿™é‡Œå¼€å§‹ç”Ÿæˆcppæºæ–‡ä»¶
 	]]
 	
 	showlog(string.format("++++++++++ Generate sample data file [%s.cpp] ", classname));
 	local cppfilename = outputpath .. outputfilename .. ".cpp";
 	local cppfile = io.open(cppfilename, 'w+b');
 	if cppfile then
-		-- ÔØÈëÔ´ÎÄ¼şÄ£°å
+		-- è½½å…¥æºæ–‡ä»¶æ¨¡æ¿
 		local templatecppfile = io.open(dir .. 'template/template.cpp', 'r+b');
 		local templatecppdata = nil;
 		if templatecppfile then
@@ -273,10 +273,10 @@ void %s::keyMenuClicked( void )
 		end
 		
 		if templatecppdata then
-			-- Ìæ»»°ó¶¨±äÁ¿Êı¾İ
+			-- æ›¿æ¢ç»‘å®šå˜é‡æ•°æ®
 			templatecppdata = string.gsub(templatecppdata, "($[%w]+)", DataCache);			
 			
-			-- µ¼³öÔ´ÎÄ¼ş
+			-- å¯¼å‡ºæºæ–‡ä»¶
 			cppfile:write(templatecppdata);
 		end
 		
