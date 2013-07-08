@@ -10,9 +10,10 @@
 
 #include "cocos2d.h"
 #include "cocos-ext.h"
+$includeHeader
 
 class $classname:
-	public cocos2d::$inheritclass,
+	$prefixClass$inheritclass,$inheritByCCTableViewClass
 	public cocos2d::extension::CCBSelectorResolver,
 	public cocos2d::extension::CCBMemberVariableAssigner
 {
@@ -34,7 +35,7 @@ $memberInit
 
 	virtual bool onAssignCCBMemberVariable( cocos2d::CCObject* pTarget, const char* pMemberVariableName, cocos2d::CCNode* pNode );
 
-
+	$virtualFunctions
 private:
 	// Attributes for CCB
 $bindMemberVariableDeclare
@@ -43,7 +44,9 @@ public:
 	// Virtual Functions
 	virtual bool init();
 	virtual void onEnter();
+	virtual void onExit();
 $keyMenuAndBackFunctionDeclare
+$inheritByCCTableViewVirtualFunctionDeclare
 	
 public:
 	// Funcitons

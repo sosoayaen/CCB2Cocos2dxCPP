@@ -40,9 +40,9 @@ bool $classname::init()
 
 		pCCBReader->release();
 		
-		bRet = true;
-		
 		$setKeypadEnabled
+		
+		bRet = true;
 		
 	} while(0);
 	
@@ -52,7 +52,13 @@ bool $classname::init()
 void $classname::onEnter()
 {
 	$inheritclass::onEnter();
-	// TODO:
+	// TODO: 这里可以定义进入场景的初始化，比如控件的初始位置，初始状态等
+}
+
+void $classname::onExit()
+{
+	$inheritclass::onExit();
+	// TODO: 退出场景，取消CCNotificationCenter可以放在这里做，但是对应在onEnter的时候要重新注册
 }
 
 SEL_CallFuncN $classname::onResolveCCBCCCallFuncSelector( CCObject * pTarget, const char* pSelectorName )
@@ -86,3 +92,5 @@ $controlSelectorCallback
 $callfuncSelectorCallback
 
 $androidMenuReturnCallback
+
+$inheritByCCTableViewVirtualFunctionImplement

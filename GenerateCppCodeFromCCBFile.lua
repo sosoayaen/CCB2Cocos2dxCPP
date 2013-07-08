@@ -13,6 +13,7 @@ local outputpath = OUTPUTPATH or arg[4] or ''
 local inheritclass = INHERITCLASS or arg[5] or "CCLayer" 	-- 默认继承自CCLayer
 local supportAndroidMenuReturn = SUPPORT_ANDROID_MENU_RETURN or arg[6]
 local dir = DIR or '';
+local useCCTableView = USECCTABLEVIEW or arg[7] -- 设置是否继承自CCTableView
 
 local showlog = showlog or print;
 
@@ -66,7 +67,7 @@ if file then
 				table.insert(menuSelectorTbl, menuSelector);
 			end
 			
-			local controlSelector = string.match(lineData, "(onPressControl[^<]+");
+			local controlSelector = string.match(lineData, "(onPressControlButton[^<]+)");
 			if controlSelector then
 				table.insert(controlSelectorTbl, controlSelector);
 			end
@@ -126,9 +127,10 @@ if file then
 		local varType = 'unKnowType';
 		local extension = '';
 		for idx, types in ipairs(smartMatchTypeTbl) do
+--			if string.find(member, "Part") and string.find(member, types) then error(member .. ' ' .. types) end
 			if string.find(member, types) then
 				-- 这里可以加入一个判断是否是扩展类型的判断
-				print(member, types);
+				-- print(member, types);
 				varType = types;
 				break;
 			end
@@ -159,7 +161,7 @@ if file then
 		table.insert(menuSelectorCallbackTbl, string.format(menuCallBackTpl, classname, ms));
 	end
 	
-	local menuCallBackTpl = [[void %s::%s(CCObject* pSender, CCControlEvent event)
+	local controlCallBackTbp = [[void %s::%s(CCObject* pSender, CCControlEvent event)
 {
 	// TODO:
 }
@@ -173,7 +175,7 @@ if file then
 		table.insert(controlSelectorBindTbl,
 			string.format('\tCCB_SELECTORRESOLVER_CCCONTROL_GLUE(this, "%s", %s::%s);\n', cs, classname, cs));
 		-- 生成对应按钮回调函数实现代码
-		table.insert(controlSelectorCallbackTbl, string.format(controlCallBackTbp, classname, ms));
+		table.insert(controlSelectorCallbackTbl, string.format(controlCallBackTbp, classname, cs));
 	end
 	
 	local ccbfilename = string.match(filename, '\\([%w_]+\.ccb)$');
@@ -184,7 +186,10 @@ if file then
 		['$classname'] = classname;					-- 当前类名称
 		['$CLASSNAME'] = string.upper(classname);	-- 用作文件包含宏定义的名称
 		['$DATE'] = os.date("%Y-%m-%d %H:%M:%S", os.time());	-- 当前文件生成日期
+		['$prefixClass'] = "public cocos2d::";	-- 放在继承类前面的描述，比如public或者private等，仅在头文件有效，默认是继承子cocos2d命名空间，如果需要自定义修改则在下面逻辑中判断覆盖
 		['$inheritclass'] = inheritclass;	-- 继承的类
+		['$includeHeader'] = "";	-- 继承的类的头文件包含，自定义的头文件需要在这里包含
+		['$virtualFunctions'] = "";	-- 初始化虚函数，比如DialogLayer::initDialog();
 		['$memberInit'] = table.concat(initCodeTbl);	-- 初始化代码
 				
 		['$bindMemberVariableDeclare'] = table.concat(memberVariableDeclareTbl);	-- 成员变量定义
@@ -205,8 +210,24 @@ if file then
 		['$setKeypadEnabled'] = "";
 		['$androidMenuReturnCallback'] = "";
 		['$keyMenuAndBackFunctionDeclare'] = "";
+		
+		-- CCTableView 处理
+		['$inheritByCCTableViewClass'] = "";
+		['$inheritByCCTableViewVirtualFunctionDeclare'] = "";
+		['$inheritByCCTableViewVirtualFunctionImplement'] = "";
+		
 	}
 	
+	-- 如果是继承自DialogLayer
+	if inheritclass == "DialogLayer" then
+		DataCache['$prefixClass'] = "public ";	-- 直接为DialogLayer，不在cocos2d命名空间下
+		-- 加上头文件的include
+		DataCache['$includeHeader'] = '#include "DialogLayer.h"';
+		-- 加上initDialog的虚函数
+		DataCache['$virtualFunctions'] = "virtual bool onInitDialog()\n\t{\n\t\treturn true;\n\t}\n\t";
+	end
+	
+	-- 支持 Android 菜单和返回按钮
 	if supportAndroidMenuReturn then
 		DataCache['$setKeypadEnabled'] = "setKeypadEnabled(true);";
 		local tmpTpl = [[void %s::keyBackClicked( void )
@@ -226,12 +247,91 @@ void %s::keyMenuClicked( void )
 ]]
 	end
 	
+	-- 支持从CCTableView集成
+	if useCCTableView then
+		-- 集成类声明
+		DataCache['$inheritByCCTableViewClass'] = "\n\tpublic cocos2d::extension::CCTableViewDataSource,\n\tpublic cocos2d::extension::CCTableViewDelegate,";
+		-- 设置虚函数声明
+		DataCache['$inheritByCCTableViewVirtualFunctionDeclare'] = [[
+	//////////////////////////////////////////////////////////////////////////
+	// CCScrollViewDelegate virtual function
+	//////////////////////////////////////////////////////////////////////////
+	virtual void scrollViewDidScroll(cocos2d::extension::CCScrollView* view);
+
+	virtual void scrollViewDidZoom(cocos2d::extension::CCScrollView* view);
+
+	//////////////////////////////////////////////////////////////////////////
+	// CCTableViewDelegate virtual function
+	//////////////////////////////////////////////////////////////////////////
+
+	virtual void tableCellTouched(cocos2d::extension::CCTableView* table, cocos2d::extension::CCTableViewCell* cell);
+
+	virtual cocos2d::CCSize cellSizeForTable(cocos2d::extension::CCTableView *table);
+
+	virtual cocos2d::extension::CCTableViewCell* tableCellAtIndex(cocos2d::extension::CCTableView *table, unsigned int idx);
+
+	virtual unsigned int numberOfCellsInTableView(cocos2d::extension::CCTableView *table);
+]]
+		-- 设置cpp中的虚函数实现
+		local tmpTpl = [[
+void $classname::scrollViewDidScroll( CCScrollView* view )
+{
+
+}
+
+void $classname::scrollViewDidZoom( CCScrollView* view )
+{
+
+}
+
+void $classname::tableCellTouched( CCTableView* table, CCTableViewCell* cell )
+{
+	CCLOG("cell touched at index: %i, table's children counts:%i", cell->getIdx()+1, numberOfCellsInTableView(NULL));
+	
+	if (cell != NULL)
+	{
+		// TODO: Do something when TOUCH the item
+	} // end if (cell != NULL)
+}
+
+CCSize $classname::cellSizeForTable( CCTableView *table )
+{
+	// Return a CCSize with the item size you want to show
+	return CCSizeMake(100, 100);
+}
+
+CCTableViewCell* $classname::tableCellAtIndex( CCTableView *table, unsigned int idx )
+{
+	CCTableViewCell* pCell = table->dequeueCell();
+
+	if (!pCell)
+	{
+		pCell = new CCTableViewCell();
+		pCell->autorelease();
+		// TODO: Add some control to the Cell like CCSprite and so on ...
+	}
+	else
+	{
+		// TODO: Update the Control or data you added before in Cell
+	}
+	return pCell;
+}
+
+unsigned int $classname::numberOfCellsInTableView( CCTableView *table )
+{
+	// TODO: return the counts of TableView
+	return 1;
+}
+]]
+		DataCache['$inheritByCCTableViewVirtualFunctionImplement'] = string.gsub(tmpTpl, "$classname", classname);
+	end
+	
 	--[[
 		这里开始生成头文件
 	]]
 	showlog(string.format("++++++++++ Generate sample data file [%s.h] ", classname));
 	local hfilename = outputpath .. outputfilename .. ".h";
-
+	
 	local hfile = io.open(hfilename, 'w+b');
 	if hfile then
 		-- 载入头文件模板

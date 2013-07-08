@@ -7,6 +7,8 @@ smartMatchTypeTbl =
 	"Layer",	-- 层
 	"Node", 	-- 节点
 	"LabelTTF", -- 显示文字控件
+	"ControlButton", -- 按钮
+	"ParticleSystemQuad",	-- 粒子效果
 }
 
 -- WIN32 的GUI中选择基类的ComboBox的下拉列表内容
