@@ -61,7 +61,7 @@ if file then
 				break;
 			end
 			
-			-- 判断是否有 onPress 关键字（这里建议ccb中回调携程onPressMenu等，避免抓取错误）
+			-- 判断是否有 onPress 关键字（这里建议ccb中回调写成onPressMenu等，避免抓取错误）
 			local menuSelector = string.match(lineData, "(onPressMenu[^<]+)");
 			if menuSelector then
 				table.insert(menuSelectorTbl, menuSelector);
@@ -118,30 +118,35 @@ if file then
 	-- Control回调函数实现cpp
 	local controlSelectorCallbackTbl = {};
 	
+	-- 增加一个判断重复的列表，如果有重复则不添加
+	local duplicateTbl = {};
+	
 	-- 成员变量绑定
 	for idx, member in ipairs(varAssignmentTbl) do
-		-- 生成初始化代码
-		table.insert(initCodeTbl, string.format("\t\t%s = NULL;\n", member));
-		
-		-- 判断是什么类型的数据
-		local varType = 'unKnowType';
-		local extension = '';
-		for idx, types in ipairs(smartMatchTypeTbl) do
---			if string.find(member, "Part") and string.find(member, types) then error(member .. ' ' .. types) end
-			if string.find(member, types) then
-				-- 这里可以加入一个判断是否是扩展类型的判断
-				-- print(member, types);
-				varType = types;
-				break;
+		if duplicateTbl[member] ~= true then
+			duplicateTbl[member] = true
+			-- 生成初始化代码
+			table.insert(initCodeTbl, string.format("\t\t%s = NULL;\n", member));
+			
+			-- 判断是什么类型的数据
+			local varType = 'unKnowType';
+			local extension = '';
+			for idx, types in ipairs(smartMatchTypeTbl) do
+	--			if string.find(member, "Part") and string.find(member, types) then error(member .. ' ' .. types) end
+				if string.find(member, types) then
+					-- 这里可以加入一个判断是否是扩展类型的判断
+					-- print(member, types);
+					varType = types;
+					break;
+				end
 			end
+			table.insert(memberVariableDeclareTbl, string.format('\tcocos2d::%sCC%s* %s;\n', extension, varType, member));
+			
+			-- 生成绑定成员代码
+			table.insert(memberVariableBindTbl,
+				string.format('\tCCB_MEMBERVARIABLEASSIGNER_GLUE(this, "%s", CC%s*, this->%s);\n',
+				member, varType, member));
 		end
-		table.insert(memberVariableDeclareTbl, string.format('\tcocos2d::%sCC%s* %s;\n', extension, varType, member));
-		
-		-- 生成绑定成员代码
-		table.insert(memberVariableBindTbl,
-			string.format('\tCCB_MEMBERVARIABLEASSIGNER_GLUE(this, "%s", CC%s*, this->%s);\n',
-			member, varType, member));
-				
 	end
 	
 	local menuCallBackTpl = [[void %s::%s(CCObject* pSender)
@@ -150,15 +155,20 @@ if file then
 }
 
 ]]
+
+	duplicateTbl = {}
 	-- 菜单回调绑定
 	for idx, ms in ipairs(menuSelectorTbl) do
-		-- 生成菜单回调声明
-		table.insert(menuSelectorDeclareTbl, string.format('\tvoid %s(cocos2d::CCObject* pSender);\n', ms));
-		-- 生成菜单回调绑定
-		table.insert(menuSelectorBindTbl, 
+		if duplicateTbl[ms] ~= true then
+			duplicateTbl[ms] = true
+			-- 生成菜单回调声明
+			table.insert(menuSelectorDeclareTbl, string.format('\tvoid %s(cocos2d::CCObject* pSender);\n', ms));
+			-- 生成菜单回调绑定
+			table.insert(menuSelectorBindTbl, 
 			string.format('\tCCB_SELECTORRESOLVER_CCMENUITEM_GLUE(this, "%s", %s::%s);\n', ms, classname, ms));
-		-- 生成对应菜单回调函数实现代码
-		table.insert(menuSelectorCallbackTbl, string.format(menuCallBackTpl, classname, ms));
+			-- 生成对应菜单回调函数实现代码
+			table.insert(menuSelectorCallbackTbl, string.format(menuCallBackTpl, classname, ms));
+		end
 	end
 	
 	local controlCallBackTbp = [[void %s::%s(CCObject* pSender, CCControlEvent event)
@@ -167,15 +177,20 @@ if file then
 }
 
 ]]
+
+	duplicateTbl = {}
 	-- Control 回调绑定
 	for idx, cs in ipairs(controlSelectorTbl) do
-		-- 生成control回调声明
-		table.insert(controlSelectorDeclareTbl, string.format('\tvoid %s(cocos2d::CCObject* pSender, cocos2d::extension::CCControlEvent event);\n', cs));
-		-- 生成control回调绑定
-		table.insert(controlSelectorBindTbl,
-			string.format('\tCCB_SELECTORRESOLVER_CCCONTROL_GLUE(this, "%s", %s::%s);\n', cs, classname, cs));
-		-- 生成对应按钮回调函数实现代码
-		table.insert(controlSelectorCallbackTbl, string.format(controlCallBackTbp, classname, cs));
+		if duplicateTbl[cs] ~= true then
+			duplicateTbl[cs] = true
+			-- 生成control回调声明
+			table.insert(controlSelectorDeclareTbl, string.format('\tvoid %s(cocos2d::CCObject* pSender, cocos2d::extension::CCControlEvent event);\n', cs));
+			-- 生成control回调绑定
+			table.insert(controlSelectorBindTbl,
+				string.format('\tCCB_SELECTORRESOLVER_CCCONTROL_GLUE(this, "%s", %s::%s);\n', cs, classname, cs));
+			-- 生成对应按钮回调函数实现代码
+			table.insert(controlSelectorCallbackTbl, string.format(controlCallBackTbp, classname, cs));
+		end
 	end
 	
 	local ccbfilename = string.match(filename, '\\([%w_]+\.ccb)$');
