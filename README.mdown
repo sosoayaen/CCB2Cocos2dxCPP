@@ -1,9 +1,9 @@
 CCBGenerateCppBindCode
 ===========
 
-  本脚本是用作自动生成CCB[cocosbuilder]文件到对应C++的数据绑定，使用lua脚本语言
-  当前支持的cocos2dx的版本为 2.1.2 及以上
-  当前支持的cocosbuilder版本为 3.0 Alpha3 及以上
+  本脚本是用作自动生成CCB[cocosbuilder]文件到对应C++的数据绑定，使用lua脚本语言  
+  当前支持的cocos2dx的版本为 2.1.2 及以上  
+  当前支持的cocosbuilder版本为 3.0 Alpha3 及以上  
 
 Supported Platforms
 ------------------
@@ -26,8 +26,8 @@ Command
   * -p 可选参数，后面跟上需要输出的文件夹路径
   * -i 可选参数，后面跟上当前ccb文件输出的类会继承的类名，如果不是用此参数，则默认继承自CCLayer
   * --sa 可选参数，表示代码中会增加"keyBackClicked"和"keyMenuClicked"两个函数；目前这两个函数仅支持Android，当然Win32上也会响应"keyBackClicked"函数
-  * --stv 可选参数，表示会实现CCTableView的操作函数。对应的类会继承自CCTableViewDelegate和CCTableViewDataSource并增加其virtual的函数。
-  具体请在命令行下输入 lua GenerateCppCodeFromCCBFile.lua --help 查看详细的说明
+  * --stv 可选参数，表示会实现CCTableView的操作函数。对应的类会继承自CCTableViewDelegate和CCTableViewDataSource并增加其virtual的函数。  
+  具体请在命令行下输入 `lua GenerateCppCodeFromCCBFile.lua --help` 查看详细的说明
 
 shell简化
 -------------------
@@ -37,7 +37,8 @@ shell简化
   
 GUI支持
 -------------------
-  * Win32 平台下现在有提供一个shell来调用对应的脚本，可以指定对应的输入文件和输出类名以及输出文件名等等(Win32上只在XP和WIN7上试过可用，其他版本的操作系统尚未验证）。具体可以参见lua文件中在开头获取对应参数的部分，如果需要在其他平台上支持GUI，那可以向lua传入全局变量作为一些详细设置的参数。
+  * Win32 平台下现在有提供一个shell来调用对应的脚本，可以指定对应的输入文件和输出类名以及输出文件名等等(Win32上只在XP和WIN7上试过可用，其他版本的操作系统尚未验证）。  
+  具体可以参见lua文件中在开头获取对应参数的部分，如果需要在其他平台上支持GUI，那可以向lua传入全局变量作为一些详细设置的参数。
 
 CCB Rules
 -------------------
@@ -47,27 +48,27 @@ Member bind
 ------------
   如果是对象绑定到类的成员变量，则必须满足以下要求
   * m\_pClassName
-  示例：m\_pSpriteBackground。
-  其中，最好以m\_p开头，表示是一个指针类型的成员变量。
-  后面的Class这里为Sprite，请注意，必须以C++中对应的类名称去掉CC前缀，即CCSprite写成Sprite，如果是CCMenu则为Menu，依次类推
-  最后的Name可以任意取名，比如这里的Background即可。
-  这通常表示一个背景精灵对象
+  示例：m\_pSpriteBackground。  
+  其中，最好以m\_p开头，表示是一个指针类型的成员变量。  
+  后面的Class这里为Sprite，请注意，必须以C++中对应的类名称去掉CC前缀，即CCSprite写成Sprite，如果是CCMenu则为Menu，依次类推  
+  最后的Name可以任意取名，比如这里的Background即可。  
+  这通常表示一个背景精灵对象  
   
 Menu Selector bind
 ------------
-  如果是菜单回调，则要满足以下规则
+  如果是菜单回调，则要满足以下规则  
   * onPressMenuSelectorName
-  示例：onPressMenuLogin
-  其中，必须以onPressMenu开头，这是脚本解析命令的关键词！
-  后面的SelectorName即为示例中的Login，一般表示这是一个按了界面上的登录按钮的函数回调
+  示例：onPressMenuLogin  
+  其中，必须以onPressMenu开头，这是脚本解析命令的关键词！  
+  后面的SelectorName即为示例中的Login，一般表示这是一个按了界面上的登录按钮的函数回调  
   
 ControlButton Selector bind
 ------------
   按钮的回调，需要满足以下规则
   * onPressControlSelectorName
-  示例：onPressControlLoginButton
-  其中，必须以onPressControl开头，这是脚本解析命令的关键词！
-  后面的LoginButton就是对应SelectorName段，一般从命名上可以看出来是在界面上按了登录的按钮发生的回调响应
+  示例：onPressControlLoginButton  
+  其中，必须以onPressControl开头，这是脚本解析命令的关键词！  
+  后面的LoginButton就是对应SelectorName段，一般从命名上可以看出来是在界面上按了登录的按钮发生的回调响应  
   
 Callback Function bind
 ------------
@@ -75,7 +76,7 @@ Callback Function bind
   
 Template
 ============
-  模板文件放在目录下的template中，其中定义了template.h和template.cpp。这里的两个文件相当于是作为字符串数据直接导入的。项目中的template是GBK的编码，这里无所谓编码格式，可以替换成你自己想要的任何本地编码。
+  模板文件放在目录下的template中，其中定义了template.h和template.cpp。这里的两个文件相当于是作为字符串数据直接导入的。项目中的template是GBK的编码，这里无所谓编码格式，可以替换成你自己想要的任何本地编码。  
   需要注意的地方，因为脚本文件（lua）中采用的是UTF8的编码，所以除非输出的目标文件（.h和.cpp）的编码格式为UTF8，否则不要在脚本中写任何非ASCII的数据，因为输出后会导致本地编码和UTF8编码混合造成部分乱码，特别是注释部分。解决方法是要么把脚本文件换成对应的本地编码，要么把template的文件换成UTF8的编码，这个根据你自己的项目要求而定。
 
 config.lua
@@ -88,5 +89,5 @@ smartMatchTypeTbl
 
 InheritClass
 ---------------
-  这个表仅仅用作Win32上的GUI对应继承类下拉框中的数据配置，当然，如果有人编写了其他平台的GUI程序，也可以使用这个配置来显示下拉框中的数据。如果想要增加继承的类名，则在这里增加一个配置即可，其中的DialogLayer就是自定义的一个类，最好把对应的自定义的类放到项目路径中，避免include的时候找不到。
+  这个表仅仅用作Win32上的GUI对应继承类下拉框中的数据配置，当然，如果有人编写了其他平台的GUI程序，也可以使用这个配置来显示下拉框中的数据。如果想要增加继承的类名，则在这里增加一个配置即可，其中的DialogLayer就是自定义的一个类，最好把对应的自定义的类放到项目路径中，避免include的时候找不到。  
   注意，这里需要填上类名的全称。
