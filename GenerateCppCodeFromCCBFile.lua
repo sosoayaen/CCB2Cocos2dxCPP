@@ -6,24 +6,91 @@ require 'config'
 local smartMatchTypeTbl = smartMatchTypeTbl;
 
 local arg = arg or {};
-local filename = FILENAME or arg[1]
-local classname = CLASSNAME or arg[2]
-local outputfilename = OUTPUTFILENAME or arg[3] or classname
-local outputpath = OUTPUTPATH or arg[4] or ''
-local inheritclass = INHERITCLASS or arg[5] or "CCLayer" 	-- 默认继承自CCLayer
-local supportAndroidMenuReturn = SUPPORT_ANDROID_MENU_RETURN or arg[6]
+
+-- 存放解析命令的表
+local cmdTbl = {}
+-- 是否直接把value存放到上一次对应解析到的命令表中的标志
+local bSetValue = false
+-- 对应的命令
+local command = nil;
+-- 辅助的命令表，用于配置只需要配置true的命令
+local assistCmdTbl = 
+{
+	['--sa'] = true,
+	['--supportandroidmenu'] = true,
+	['--stv'] = true,
+	['--usecctableview'] = true,
+	['-h'] = true,
+	['--help'] = true
+}
+
+-- 解析命令
+table.foreachi(arg, function(idx, value)
+	-- 是否设置
+	if bSetValue then
+		bSetValue = false
+		if command then
+			cmdTbl[command] = value
+		end
+	else
+	-- 表示是取命令模式
+		if assistCmdTbl[value] then
+			-- 直接设置该属性为true即可
+			cmdTbl[value] = true
+		else
+			command = value
+			bSetValue = true
+		end
+	end
+end)
+
+table.foreach(cmdTbl, print)
+
+-- error("stop")
+-- local filename = FILENAME or arg[1]
+-- local classname = CLASSNAME or arg[2]
+-- local outputfilename = OUTPUTFILENAME or arg[3] or classname
+-- local outputpath = OUTPUTPATH or arg[4] or ''
+-- local inheritclass = INHERITCLASS or arg[5] or "CCLayer" 	-- 默认继承自CCLayer
+-- local supportAndroidMenuReturn = SUPPORT_ANDROID_MENU_RETURN or arg[6]
+-- local dir = DIR or '';
+-- local useCCTableView = USECCTABLEVIEW or arg[7] -- 设置是否继承自CCTableView
+
+local filename = FILENAME or cmdTbl ['-f'] or cmdTbl['--filename']
+local classname = CLASSNAME or cmdTbl ['-c'] or cmdTbl['--classname']
+local outputfilename = OUTPUTFILENAME or cmdTbl['-o'] or cmdTbl['--outputfilename'] or classname
+local outputpath = OUTPUTPATH or cmdTbl['-p'] or cmdTbl['--outputpath'] or ''
+local inheritclass = INHERITCLASS or cmdTbl['-i'] or cmdTbl['--inheritclass'] or "CCLayer" 	-- 默认继承自CCLayer
+local supportAndroidMenuReturn = SUPPORT_ANDROID_MENU_RETURN or cmdTbl['--sa'] or cmdTbl['--supportandroidmenu']
 local dir = DIR or '';
-local useCCTableView = USECCTABLEVIEW or arg[7] -- 设置是否继承自CCTableView
+local useCCTableView = USECCTABLEVIEW or cmdTbl['--stv'] or cmdTbl['--usecctableview'] -- 设置是否继承自CCTableView
 
 local showlog = showlog or print;
 
+local usage = [[
+	Usage: lua %s -f filename -c classname
+	filename is which ccb file you want to parse
+	classname means the "member" and "callback function" belongs to 
+	]]
+
+local helpTxt = [[
+lua %s -f filename -c classname [-o outputfilename] [-p outputpath] [-i inheritclass] [-sa] [-stv]
+  -f	filename	Specify CCB file path.
+  -c	classname	Give the class name of cpp file.
+  -o	outputfilename	Specify out put file name, it will auto add the ".h" and ".cpp" suffix. It will be classname in default.
+  -p	outputpath	Specify out put file path	
+  -i	inheritclass	This parameter could supply a inheritclass for your class, CCLayer will be default.
+  --sa	If this parameter is set, the "keyBackClicked" and "keyMenuClicked" function will be generated in code. It only supply in Android / Win32
+  --stv If this parameter is set, the code will support CCTableView and auto generate some virtual function in code to operate CCTableView
+]]
+-- 解析帮助
+if cmdTbl['-h'] or cmdTbl['--help'] then
+	showlog(string.format(helpTxt, arg[0]))
+	return
+end
+
 if not filename or filename == "" then
 	showlog("No file input...");
-	local usage = [[
-	Usage: lua %s filename classname
-	filename is which ccb file you want to parse
-	classname means the [member] and [callback function] belongs to 
-	]]
 	showlog(string.format(usage, arg[0]));
 	return
 end
@@ -318,16 +385,20 @@ CCSize $classname::cellSizeForTable( CCTableView *table )
 CCTableViewCell* $classname::tableCellAtIndex( CCTableView *table, unsigned int idx )
 {
 	CCTableViewCell* pCell = table->dequeueCell();
-
+	
+	bool bCreateCell = false;
+	
 	if (!pCell)
 	{
 		pCell = new CCTableViewCell();
 		pCell->autorelease();
-		// TODO: Add some control to the Cell like CCSprite and so on ...
+		
+		bCreateCell = true;
 	}
-	else
+	
+	if (pCell)
 	{
-		// TODO: Update the Control or data you added before in Cell
+		// TODO: Add some control to the Cell like CCSprite and so on ...
 	}
 	return pCell;
 }
@@ -335,7 +406,7 @@ CCTableViewCell* $classname::tableCellAtIndex( CCTableView *table, unsigned int 
 unsigned int $classname::numberOfCellsInTableView( CCTableView *table )
 {
 	// TODO: return the counts of TableView
-	return 1;
+	return 0;
 }
 ]]
 		DataCache['$inheritByCCTableViewVirtualFunctionImplement'] = string.gsub(tmpTpl, "$classname", classname);

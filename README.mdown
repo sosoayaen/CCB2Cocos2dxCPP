@@ -1,7 +1,7 @@
 CCBGenerateCppBindCode
 ===========
 
-  本脚本是用作自动生成CCB[cocosbuilder]文件到对应C++的数据绑定，使用lua
+  本脚本是用作自动生成CCB[cocosbuilder]文件到对应C++的数据绑定，使用lua脚本语言
   当前支持的cocos2dx的版本为 2.1.2 及以上
   当前支持的cocosbuilder版本为 3.0 Alpha3 及以上
 
@@ -12,20 +12,32 @@ Supported Platforms
 
 Usage
 -------------------
-lua GenerateCppCodeFromCCBFile.lua ccbFilePath ClassName
+`lua GenerateCppCodeFromCCBFile.lua -f ccbFilePath -c ClassName`
   * ccbFilePath 这个是对应的要解析的ccb文件位置
   * ClassName 要生成的C++类的名称，最后会生成 ClassName.h 和 ClassName.cpp 两个文件
-  示例：lua GenerateCppCodeFromCCBFile.lua RoomSelecLayer.ccb HallScene
+  示例：`lua GenerateCppCodeFromCCBFile.lua -f RoomSelecLayer.ccb -c HallScene`
 
-现在提供一个shell来简化
+Command
 -------------------
-  * Win32 gen.bat, 在win32下在命令行下执行gen ccbfile ClassName
-  * OSX   gen.sh 在MAC系统下，执行./gen.sh ccbfile ClassName
+  这里说明下目前可调用的参数
+  * -f 必填参数，这个参数后面需要跟上对应的ccb文件的绝对路径（相对也许也行，没试过）
+  * -c 必填参数，这个参数后面需要跟上对应代码中的类名，必须提供的参数
+  * -o 可选参数，这个参数后提供输出的源代码文件名，可以和类名不同，如果不提供则默认使用类名来命名代码文件。\*.h和\*.cpp会自动加上，不需要在这里显示提供
+  * -p 可选参数，后面跟上需要输出的文件夹路径
+  * -i 可选参数，后面跟上当前ccb文件输出的类会继承的类名，如果不是用此参数，则默认继承自CCLayer
+  * --sa 可选参数，表示代码中会增加"keyBackClicked"和"keyMenuClicked"两个函数；目前这两个函数仅支持Android，当然Win32上也会响应"keyBackClicked"函数
+  * --stv 可选参数，表示会实现CCTableView的操作函数。对应的类会继承自CCTableViewDelegate和CCTableViewDataSource并增加其virtual的函数。
+  具体请在命令行下输入 lua GenerateCppCodeFromCCBFile.lua --help 查看详细的说明
+
+shell简化
+-------------------
+  * Win32 gen.bat, 在win32下在命令行下执行`gen -f ccbfile -c ClassName`
+  * OSX   gen.sh 在MAC系统下，执行`./gen.sh -f ccbfile -c ClassName`
   * Linux gen.sh 在Linux系统下提供和OSX上一样的脚本
   
 GUI支持
 -------------------
-  * Win32 平台下现在有提供一个shell来调用对应的脚本，可以指定对应的输入文件和输出类名以及输出文件名等等(Win32上只在XP和WIN7上试过可用，其他版本的操作系统尚未验证）
+  * Win32 平台下现在有提供一个shell来调用对应的脚本，可以指定对应的输入文件和输出类名以及输出文件名等等(Win32上只在XP和WIN7上试过可用，其他版本的操作系统尚未验证）。具体可以参见lua文件中在开头获取对应参数的部分，如果需要在其他平台上支持GUI，那可以向lua传入全局变量作为一些详细设置的参数。
 
 CCB Rules
 -------------------
@@ -34,9 +46,9 @@ CCB Rules
 Member bind
 ------------
   如果是对象绑定到类的成员变量，则必须满足以下要求
-  * m_pClassName
-  示例：m_pSpriteBackground。
-  其中，最好以m_p开头，表示是一个指针类型的成员变量。
+  * m\_pClassName
+  示例：m\_pSpriteBackground。
+  其中，最好以m\_p开头，表示是一个指针类型的成员变量。
   后面的Class这里为Sprite，请注意，必须以C++中对应的类名称去掉CC前缀，即CCSprite写成Sprite，如果是CCMenu则为Menu，依次类推
   最后的Name可以任意取名，比如这里的Background即可。
   这通常表示一个背景精灵对象
@@ -61,3 +73,20 @@ Callback Function bind
 ------------
   目前项目中暂时没有用到，尚未实现
   
+Template
+============
+  模板文件放在目录下的template中，其中定义了template.h和template.cpp。这里的两个文件相当于是作为字符串数据直接导入的。项目中的template是GBK的编码，这里无所谓编码格式，可以替换成你自己想要的任何本地编码。
+  需要注意的地方，因为脚本文件（lua）中采用的是UTF8的编码，所以除非输出的目标文件（.h和.cpp）的编码格式为UTF8，否则不要在脚本中写任何非ASCII的数据，因为输出后会导致本地编码和UTF8编码混合造成部分乱码，特别是注释部分。解决方法是要么把脚本文件换成对应的本地编码，要么把template的文件换成UTF8的编码，这个根据你自己的项目要求而定。
+
+config.lua
+============
+  这个文件中存放了一些配置，目前有两张表：smartMatchTypeTbl，InheritClass。前面这个是必须的配置，你可以在这张表中增加你想要支持的变量绑定的关键字，一般建议为除去CC开头的类名。这里的数据用作绑定变量数据的匹配捕捉。后面的表仅仅是给Win32上的GUI用的。
+
+smartMatchTypeTbl
+---------------
+  值得注意的是，现在的捕捉规则比较简单，只是简单的全部匹配，而且是顺序匹配，比如你要捕捉的是MenuItem这个关键字，那么比如MenuItemImage之类的就必须放到MenuItem之前，否则可能会先匹配到MenuItem导致变量类型不符（MenuItem是基类，倒是不会出现不能使用的情况，如果变量绑定后只是用作定位，则没有关系，如果需要用到特定类的函数，则可能会导致基类对应的函数找不到而不能使用）。
+
+InheritClass
+---------------
+  这个表仅仅用作Win32上的GUI对应继承类下拉框中的数据配置，当然，如果有人编写了其他平台的GUI程序，也可以使用这个配置来显示下拉框中的数据。如果想要增加继承的类名，则在这里增加一个配置即可，其中的DialogLayer就是自定义的一个类，最好把对应的自定义的类放到项目路径中，避免include的时候找不到。
+  注意，这里需要填上类名的全称。
