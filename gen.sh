@@ -1,3 +1,3 @@
 #!/bin/bash
 
-lua GenerateCppCodeFromCCBFile.lua $1 $2 $3 $4
+lua GenerateCppCodeFromCCBFile.lua "$@"

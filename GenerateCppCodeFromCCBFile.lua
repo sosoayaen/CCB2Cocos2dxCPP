@@ -260,7 +260,7 @@ if file then
 		end
 	end
 	
-	local ccbfilename = string.match(filename, '\\([%w_]+\.ccb)$');
+	local ccbfilename = string.match(filename, '([%w_]+\.ccb)$');
 	-- 方便后来一次性替换的临时数据表格
 	local DataCache =
 	{
