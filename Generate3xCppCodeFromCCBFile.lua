@@ -68,7 +68,7 @@ if not string.match(outputpath, '.+[\\/]$') then
 	outputpath = outputpath .. '/';
 end
 
-local inheritclass = INHERITCLASS or cmdTbl['-i'] or cmdTbl['--inheritclass'] or "CCLayer" 	-- 默认继承自CCLayer
+local inheritclass = INHERITCLASS or cmdTbl['-i'] or cmdTbl['--inheritclass'] or "Layer" 	-- 默认继承自Layer
 local supportAndroidMenuReturn = SUPPORT_ANDROID_MENU_RETURN or cmdTbl['--sa'] or cmdTbl['--supportandroidmenu']
 local dir = DIR or '';
 local useTableView = USETABLEVIEW or cmdTbl['--stv'] or cmdTbl['--usetableview'] -- 设置是否继承自CCTableView
