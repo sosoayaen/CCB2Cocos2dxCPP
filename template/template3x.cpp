@@ -47,14 +47,11 @@ bool $classname::init()
         
         if (pNode != NULL)
         {
-            m_pCCBRoot = pNode;
             this->addChild(pNode);
         }
         
         pCCBReader->release();		
 
-		initLabelTTF();
-		
 		bRet = true;
 		
 	} while(0);

@@ -53,15 +53,25 @@ end)
 -- table.foreach(cmdTbl, print)
 
 local filename = FILENAME or cmdTbl['-f'] or cmdTbl['--filename']
+-- 文件名先判断下是否是根目录，如果是根目录就是绝对路径
+-- 如果是相对路径则加上配置的目录
+print('filename ', filename)
+if string.match(filename or '', '[^/\\]') then
+	filename = (defaultConfig.source_directory or '') .. filename
+end
+print('filename ', filename)
+
 local classname = CLASSNAME or cmdTbl['-c'] or cmdTbl['--classname']
 if not classname or classname == '' then
 	-- 按照文件名去除后缀的方式取得默认类名称
-	classname = string.match(filename or '', '.-(%w+)\.ccb')
+	classname = string.match(filename or '', '([%w_-]+)\.ccb$')
 end
+
 -- 输出的文件名默认就是类名
 local outputfilename = OUTPUTFILENAME or cmdTbl['-o'] or cmdTbl['--outputfilename'] or classname
+
 -- 默认就是当前目录
-local outputpath = OUTPUTPATH or cmdTbl['-p'] or cmdTbl['--outputpath'] or '.'
+local outputpath = OUTPUTPATH or cmdTbl['-p'] or cmdTbl['--outputpath'] or defaultConfig.output_directory or '.'
 
 -- 优化下路径，添加最后的文件夹路径
 if not string.match(outputpath, '.+[\\/]$') then
@@ -73,7 +83,9 @@ local supportAndroidMenuReturn = SUPPORT_ANDROID_MENU_RETURN or cmdTbl['--sa'] o
 local dir = DIR or '';
 local useTableView = USETABLEVIEW or cmdTbl['--stv'] or cmdTbl['--usetableview'] -- 设置是否继承自CCTableView
 
-local showlog = showlog or print;
+local showlog = showlog or function(pattern, ...)
+	print(string.format(pattern, unpack(arg or {})))
+end
 
 local usage = [[
 Usage: lua %s -f filename -c classname
@@ -120,6 +132,7 @@ showlog(string.format('3. Output file path is [%s]', outputpath))
 -- 文件名
 showlog(string.format('4. Header file name is [%s.h], source file name is [%s.cpp]', outputfilename, outputfilename))
 
+-- 罗列输出的序号，前面已经有4个列表了，所以初始化为4
 local helpTxtCnt = 4
 -- 继承
 if inheritclass then
@@ -141,6 +154,8 @@ local FLAG_MEMBER_NONE		= 0
 local FLAG_MEMBER_COMMENT	= 1
 -- 绑定变量的名字
 local FLAG_MEMBER_NAME		= 2
+-- 变量基类标志
+local FLAG_MEMBER_CLASS		= 3
 
 if file then
 	-- 先读入到内存
@@ -151,6 +166,10 @@ if file then
 	local menuSelectorTbl = {};
 	local menuSelectorOnceTbl = {}; -- 避免重复回调的表
 	local controlSelectorTbl = {};
+	-- 用来保存得到的所有的变量基类名字，最后一个就是当前处理的基类名字
+	-- 遇到一个display后移除最后的类名
+	local baseClassNestTbl = {}
+
 	local lineCnt = 1;
 	-- 数据解析部分，从ccb文件中抓取需要的数据
 	while lineData do
@@ -159,14 +178,31 @@ if file then
 				break
 			end
 			
+			-- 校验是否是基类
+			if varAssignmentFlag == FLAG_MEMBER_CLASS then
+				local baseClass = string.match(lineData, "<string>(.+)</string>")
+				if baseClass and baseClass ~= "" then
+					-- 根据当前的版本转换下类名，把命名空间顺便也塞一份新的，供后面调用
+					local baseClassConfig = classChange3xConfig[baseClass]
+					local newBaseClass = {}
+					newBaseClass.baseClass = (baseClassConfig and baseClassConfig.baseClass) or baseClass
+					newBaseClass.nameSpace = (baseClassConfig and baseClassConfig.nameSpace) or 'cocos2d'
+					table.insert(baseClassNestTbl, newBaseClass)
+				else
+					error("baseClass could not be nil or empty string!")
+				end
+				-- 清空
+				varAssignmentFlag = FLAG_MEMBER_NONE
+				break
 			-- 检查是否是注释，注释是在之前的
-			if varAssignmentFlag == FLAG_MEMBER_COMMENT then
+			elseif varAssignmentFlag == FLAG_MEMBER_COMMENT then
 				local comment = string.match(lineData, "<string>(.+)</string>")
 				if comment and comment ~= "" then
+					local member = {}
 					-- 得到描述的名称
 					-- showlog(string.format('comment:[%s]', comment))
-					local member = {}
 					member.comment = comment
+					-- 变量的注释会先于绑定变量名出现，所以会先生成一个member对象
 					table.insert(varAssignmentTbl, member)
 				end
 				varAssignmentFlag = FLAG_MEMBER_NONE
@@ -175,15 +211,27 @@ if file then
 			elseif varAssignmentFlag == FLAG_MEMBER_NAME then
 				local memberName = string.match(lineData, "<string>([%w_]-)</string>");
 				if memberName and memberName ~= "" and not varAssignmengOnceTbl[memberName] then
-					-- showlog(string.format('member.name:[%s]', memberName))
 					varAssignmengOnceTbl[memberName] = true
 					local member = varAssignmentTbl[#varAssignmentTbl]
 					if type(member) == 'table' then
 						member.name = memberName
+						local baseClassConfig = (#baseClassNestTbl > 0) and baseClassNestTbl[#baseClassNestTbl]
+						if not baseClassConfig then
+							error(string.format('baseClass could not be nil!!, member.name:[%s]', member.name))
+						end
+
+						member.baseClass = baseClassConfig.baseClass
+						member.nameSpace = baseClassConfig.nameSpace
+						--[[
+						showlog('---==MEMBER CONTENT==---')
+						table.foreach(member, print)
+						--]]
 					end
 				end
 				varAssignmentFlag = FLAG_MEMBER_NONE
-				break;
+				-- 基类栈顶缓存出栈，回到上一个未被匹配的项
+				table.remove(baseClassNestTbl, #baseClassNestTbl)
+				break
 			end
 
 			-- 判断是否有 onPress 关键字（这里建议ccb中回调写成onPressMenu等，避免抓取错误）
@@ -199,13 +247,19 @@ if file then
 				table.insert(controlSelectorTbl, controlSelector)
 			end
 			
-			if string.find(lineData, "displayName") then
+			-- 针对Key的名字设置对应的标志名称
+			local keyName = string.match(lineData, "<key>(.+)</key>")
+			if keyName == "displayName" then
 				-- 检查是否是display字段
 				varAssignmentFlag = FLAG_MEMBER_COMMENT
-			elseif string.find(lineData, "memberVarAssignmentName") then
+			elseif keyName == "memberVarAssignmentName" then
 				-- 下一行数据为绑定变量
 				varAssignmentFlag = FLAG_MEMBER_NAME
+			elseif keyName == "baseClass" then
+				-- 下一行数据为基类名称
+				varAssignmentFlag = FLAG_MEMBER_CLASS
 			end
+
 		until true
 		
 		lineCnt = lineCnt + 1;
@@ -214,14 +268,14 @@ if file then
 	
 	file:close();
 	
-	showlog("------------ Member bind list:")
+	showlog("----- Member bind list:")
 	table.foreach(varAssignmentTbl, function(key, value)
 		if value.name then
-			showlog(string.format("member variable: %s", value.name))
+			showlog("member variable: %s", value.name)
 		end
 	end);
 	
-	showlog("------------ Menu selector bind list:");
+	showlog("----- Menu selector bind list:");
 	table.foreach(menuSelectorTbl, function(key, value)
 		showlog(value);
 	end);
@@ -251,26 +305,20 @@ if file then
 	
 	-- 成员变量绑定
 	for idx, member in ipairs(varAssignmentTbl) do
+		-- 只有成员变量名称命名的才绑定，否则略过
 		if member.name and duplicateTbl[member.name] ~= true then
 			duplicateTbl[member.name] = true
-			
-			-- 判断是什么类型的数据
-			local varType = 'unKnowType';
-			-- 非cocos2d命名空间
-			local namespace = '';
-			for idx, types in ipairs(smartMatchTypeTbl) do
-				if string.find(member.name, types.key) then
-					varType = types.key;
-					namespace = types.ns;
-					break;
-				end
-			end
-			table.insert(memberVariableDeclareTbl, string.format('\t// %s\n\t%s::%s* %s = nullptr;\n', member.comment, namespace, varType, member.name));
+			--[[
+			showlog('--======--')
+			table.foreach(member, print)
+			--]]
+
+			table.insert(memberVariableDeclareTbl, string.format('\t// %s\n\t%s::%s* %s = nullptr;\n', member.comment, member.nameSpace, member.baseClass, member.name));
 			
 			-- 生成绑定成员代码
 			table.insert(memberVariableBindTbl,
 				string.format('\tCCB_MEMBERVARIABLEASSIGNER_GLUE_WEAK(this, "%s", %s*, this->%s);\n',
-				member.name, varType, member.name));
+				member.name, member.baseClass, member.name));
 		end
 	end
 	
