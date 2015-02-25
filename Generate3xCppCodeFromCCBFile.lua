@@ -9,8 +9,6 @@ local inheritClassHanleFunc = require 'pluggin.inherit'
 -- 加载插件tableviewex
 local tableviewexHandleFunc = require 'pluggin.tableviewex'
 
-local smartMatchTypeTbl = smartMatchTypeTbl;
-
 local arg = arg or {};
 
 -- 存放解析命令的表
