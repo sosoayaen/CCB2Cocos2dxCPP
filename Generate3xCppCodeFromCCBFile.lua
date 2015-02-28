@@ -267,9 +267,12 @@ if file then
 	file:close();
 	
 	showlog("----- Member bind list:")
+	-- 绑定变量的个数
+	local nMemberBindCnt = 0
 	table.foreach(varAssignmentTbl, function(key, value)
 		if value.name then
 			showlog("member variable: %s", value.name)
+			nMemberBindCnt = nMemberBindCnt + 1
 		end
 	end);
 	
@@ -300,23 +303,30 @@ if file then
 	
 	-- 增加一个判断重复的列表，如果有重复则不添加
 	local duplicateTbl = {};
+	-- 记录重复的变量名称
+	local duplicateVariableNameTbl = {}
 	
 	-- 成员变量绑定
 	for idx, member in ipairs(varAssignmentTbl) do
 		-- 只有成员变量名称命名的才绑定，否则略过
-		if member.name and duplicateTbl[member.name] ~= true then
-			duplicateTbl[member.name] = true
-			--[[
-			showlog('--======--')
-			table.foreach(member, print)
-			--]]
+		if member.name then
+			if duplicateTbl[member.name] ~= true then
+				duplicateTbl[member.name] = true
+				--[[
+				showlog('--======--')
+				table.foreach(member, print)
+				--]]
 
-			table.insert(memberVariableDeclareTbl, string.format('\t// %s\n\t%s::%s* %s = nullptr;\n', member.comment, member.nameSpace, member.baseClass, member.name));
-			
-			-- 生成绑定成员代码
-			table.insert(memberVariableBindTbl,
-				string.format('\tCCB_MEMBERVARIABLEASSIGNER_GLUE_WEAK(this, "%s", %s*, this->%s);\n',
-				member.name, member.baseClass, member.name));
+				table.insert(memberVariableDeclareTbl, string.format('\t// %s\n\t%s::%s* %s = nullptr;\n', member.comment, member.nameSpace, member.baseClass, member.name));
+				
+				-- 生成绑定成员代码
+				table.insert(memberVariableBindTbl,
+					string.format('\tCCB_MEMBERVARIABLEASSIGNER_GLUE_WEAK(this, "%s", %s*, this->%s);\n',
+					member.name, member.baseClass, member.name));
+			else
+				-- 把重复的记录下来，输出到最终日志中
+				duplicateVariableNameTbl[member.name] = (duplicateVariableNameTbl[member.name] or 0) + 1
+			end
 		end
 	end
 	
@@ -439,7 +449,7 @@ void %s::keyMenuClicked( void )
 	--[[
 		这里开始生成头文件
 	]]
-	showlog(string.format("++++++++++ Generate sample data file [%s.h] ", classname));
+	showlog("++++++++++ Generate sample data file [%s.h]", classname);
 
 	local hfilename = outputpath .. outputfilename .. ".h";
 	
@@ -471,7 +481,7 @@ void %s::keyMenuClicked( void )
 		这里开始生成cpp源文件
 	]]
 	
-	showlog(string.format("++++++++++ Generate sample data file [%s.cpp] ", classname));
+	showlog("++++++++++ Generate sample data file [%s.cpp]", classname);
 	local cppfilename = outputpath .. outputfilename .. ".cpp";
 	local cppfile = io.open(cppfilename, 'w+b');
 	if cppfile then
@@ -495,6 +505,16 @@ void %s::keyMenuClicked( void )
 		error(string.format("[%s] can't be opened ...", hfilename));
 	end
 	
+	-- 输出对应的结果
+	-- 绑定变量的个数
+	showlog('========== Member bind count: %d ==========', nMemberBindCnt)
+	-- 显示重复的变量名称，和重复的次数
+	showlog(' ----Duplicated member variable data----')
+	table.foreach(duplicateVariableNameTbl, function(key, value)
+		showlog(' - name:[%s] cnt:[%d]', key, value)
+	end)
+	showlog(' ' .. string.rep('-', 39))
+
 else
 	error(string.format("Open file [%s] failed, please be sure the file is existed and try again later.", filename));
 end
