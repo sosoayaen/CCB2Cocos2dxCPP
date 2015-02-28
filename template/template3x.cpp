@@ -59,6 +59,20 @@ bool $classname::init()
 	return bRet;
 }
 
+void $classname::onEnter()
+{
+	$inheritclass::onEnter();
+
+	// TODO: Your onEnter code here.
+}
+
+void $classname::onExit()
+{
+	// TODO: Your onExit code here.
+
+	$inheritclass::onExit();
+}
+
 bool $classname::onAssignCCBMemberVariable( Ref* pTarget, const char* pMemberVariableName, Node* pNode )
 {
 $bindMemberVariable

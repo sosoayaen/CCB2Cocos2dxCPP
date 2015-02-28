@@ -42,6 +42,8 @@ $protectedVirtualFunctionsDeclare
 public:
 	// Virtual Functions
 	virtual bool init() override;
+	virtual void onEnter() override;
+	virtual void onExit() override;
 $inheritByTableViewVirtualFunctionDeclare
 	
 public:
