@@ -53,11 +53,9 @@ end)
 local filename = FILENAME or cmdTbl['-f'] or cmdTbl['--filename']
 -- 文件名先判断下是否是根目录，如果是根目录就是绝对路径
 -- 如果是相对路径则加上配置的目录
-print('filename ', filename)
 if string.match(filename or '', '[^/\\]') then
 	filename = (defaultConfig.source_directory or '') .. filename
 end
-print('filename ', filename)
 
 local classname = CLASSNAME or cmdTbl['-c'] or cmdTbl['--classname']
 if not classname or classname == '' then
