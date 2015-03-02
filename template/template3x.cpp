@@ -50,7 +50,10 @@ bool $classname::init()
             this->addChild(pNode);
         }
         
-        pCCBReader->release();		
+        pCCBReader->release();
+
+		// init menu control
+		initMenuControl();
 
 		bRet = true;
 		
@@ -71,6 +74,12 @@ void $classname::onExit()
 	// TODO: Your onExit code here.
 
 	$inheritclass::onExit();
+}
+
+void $classname::initMenuControl()
+{
+	// TODO: Handle menu init code here.
+	
 }
 
 bool $classname::onAssignCCBMemberVariable( Ref* pTarget, const char* pMemberVariableName, Node* pNode )

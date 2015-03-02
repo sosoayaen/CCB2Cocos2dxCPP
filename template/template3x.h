@@ -34,6 +34,9 @@ private:
 $bindMemberVariableDeclare
 
 private:
+	// Init Menu
+	void initMenuControl();
+
 $privateVirtualFunctionsDeclare
 
 protected:

@@ -19,10 +19,11 @@ local dialogLayerHandleFunc = function(Cache, inheritClassName, className)
 	commonHandleFunc(Cache, inheritClassName, className)
 	-- DialogLayer 现在是归类在 bailin::ui::命名空间下
 	Cache['$prefixClass'] = 'public bailin::ui::'
+	--[[
 	-- 增加initMainBoard虚函数实现
 	Cache['$privateVirtualFunctionsDeclare'] = '\tvirtual bool initMainBoard() override;\n'
 	-- 增加虚函数实现体
-	local initMainBoardImplement = [[
+	local initMainBoardImplement = [-[
 bool %s::initMainBoard()
 {
 	bool bRet = false;
@@ -34,11 +35,14 @@ bool %s::initMainBoard()
 		//      addChild(m_pMainBoardNode);
 
 		bRet = true;
+		
 	} while (0);
+
 	return bRet;
 }
-	]]
+	]-]
 	appendVirtualFunctionsImplment(Cache, string.format(initMainBoardImplement, className))
+	--]]
 end
 
 -- @class ContentBaseLayer 处理函数
