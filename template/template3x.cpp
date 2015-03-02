@@ -55,6 +55,8 @@ bool $classname::init()
 		// init menu control
 		initMenuControl();
 
+		// TODO: other init here
+
 		bRet = true;
 		
 	} while(0);
@@ -79,7 +81,7 @@ void $classname::onExit()
 void $classname::initMenuControl()
 {
 	// TODO: Handle menu init code here.
-	
+	$menuControlTips
 }
 
 bool $classname::onAssignCCBMemberVariable( Ref* pTarget, const char* pMemberVariableName, Node* pNode )

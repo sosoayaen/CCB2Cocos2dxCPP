@@ -325,9 +325,20 @@ if file then
 				-- 把重复的记录下来，输出到最终日志中
 				duplicateVariableNameTbl[member.name] = (duplicateVariableNameTbl[member.name] or 0) + 1
 			end
+
 		end
 	end
 	
+	-- 循环下判断出按钮的空间，放到提示文件中
+	local menuControlTips = '/* May be used controls\n'
+	table.foreachi(varAssignmentTbl, function(i, member)
+		-- 处理可能被用到的初始化按钮提示
+		if member.name and member.baseClass and string.find(member.baseClass, 'Menu') then
+			menuControlTips = menuControlTips .. string.format('\t * %s\n', member.name)
+		end	
+	end)
+	menuControlTips = menuControlTips .. '\t */\n'
+
 	local menuCallBackTpl = [[void %s::%s(Ref* pSender)
 {
 	// TODO:
@@ -398,6 +409,8 @@ if file then
 		['$bindControlSelectorDeclare'] = table.concat(controlSelectorDeclareTbl); -- control回调函数定义
 		['$bindControlSelector'] = table.concat(controlSelectorBindTbl); -- cpp中回调函数绑定
 		['$controlSelectorCallback'] = table.concat(controlSelectorCallbackTbl); -- cpp中回调函数实现代码
+
+		['$menuControlTips'] = menuControlTips; -- 初始化按钮函数中提供当前Menu的辅助提示
 	
 		['$bindCallfuncSelectorDeclare'] = '';	-- 暂时未实现
 		['$bindCallfuncSelector'] = '';	-- 暂时未实现
@@ -443,7 +456,7 @@ void %s::keyMenuClicked( void )
 	if useTableView and tableviewexHandleFunc then
 		tableviewexHandleFunc(DataCache, classname)
 	end
-	
+
 	--[[
 		这里开始生成头文件
 	]]
