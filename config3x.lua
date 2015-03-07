@@ -16,6 +16,16 @@ classChange3xConfig =
 		baseClass = 'Layer',
 		nameSpace = 'cocos2d'
 	},
+	-- 彩色层
+	['CCLayerColor'] = {
+		baseClass = 'LayerColor',
+		nameSpace = 'cocos2d'
+	},
+	-- 渐变层
+	['CCLayerGradient'] = {
+		baseClass = 'LayerGradient',
+		nameSpace = 'cocos2d'
+	},
 	-- 九宫格图片
 	['CCScale9Sprite'] = {
 		baseClass = 'Scale9Sprite',
@@ -43,7 +53,7 @@ classChange3xConfig =
 	},
 	-- 按钮
 	['CCControlButton'] = {
-		baseClass = 'ControlButton',
+		byerGradientaseClass = 'ControlButton',
 		nameSpace = 'cocos2d::ext'
 	},
 	-- 例子效果
