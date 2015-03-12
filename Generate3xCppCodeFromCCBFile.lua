@@ -460,7 +460,7 @@ void %s::keyMenuClicked( void )
 	--[[
 		这里开始生成头文件
 	]]
-	showlog("++++++++++ Generate sample data file [%s.h]", classname);
+	showlog("++++++++++ Generate sample data file [%s.h]", outputfilename);
 
 	local hfilename = outputpath .. outputfilename .. ".h";
 	
@@ -492,7 +492,7 @@ void %s::keyMenuClicked( void )
 		这里开始生成cpp源文件
 	]]
 	
-	showlog("++++++++++ Generate sample data file [%s.cpp]", classname);
+	showlog("++++++++++ Generate sample data file [%s.cpp]", outputfilename);
 	local cppfilename = outputpath .. outputfilename .. ".cpp";
 	local cppfile = io.open(cppfilename, 'w+b');
 	if cppfile then

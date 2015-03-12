@@ -76,7 +76,7 @@ InheritClass =
 defaultConfig =
 {
 	-- 源文件夹，设置了此数据后，可以只输入文件名，自己会搜索这个目录下的文件
-	['source_directory'] = '/Users/mac/Desktop/CocosGames/guaji-sango/ccb/Resources/',
+	['source_directory'] = '/Users/mac/Documents/bailin/guaji-sango/ccb/Resources/',
 	-- 输出文件夹
-	['output_directory'] = '/Users/mac/Desktop/CocosGames/guaji-sango/frameworks/runtime-src/Classes/scene/dialog/',
+	['output_directory'] = '/Users/mac/Documents/bailin/guaji-sango/frameworks/runtime-src/Classes/scene/dialog/',
 }
