@@ -5,6 +5,10 @@ return function(DataCache, className)
 	public cocos2d::extension::TableViewDataSource,
 	public bailin::ui::TableViewDelegateEx,]]
 
+	-- 增加bailinUi.h
+	DataCache['$includeHeader'] = DataCache['$includeHeader'] .. '\n#include "bailinUi.h"'
+	DataCache['$customNamespace'] = DataCache['$customNamespace'] .. '\nUSING_NS_BL_UI;'
+
 	-- 虚函数在头文件的声明
 	DataCache['$inheritByTableViewVirtualFunctionDeclare'] = [[
 	//////////////////////////////////////////////////////////////////////////
@@ -17,13 +21,11 @@ return function(DataCache, className)
 	//////////////////////////////////////////////////////////////////////////
 	// TableViewDelegate virtual function
 	//////////////////////////////////////////////////////////////////////////
-	virtual void tableCellTouched(bailin::ui::TableViewEx* table, cocos2d::extension::TableViewCell* cell) override;
+	virtual cocos2d::Size cellSizeForTable(cocos2d::extension::TableView *table) override;
 
-	virtual cocos2d::Size cellSizeForTable(bailin::ui::TableViewEx *table) override;
+	virtual cocos2d::extension::TableViewCell* tableCellAtIndex(cocos2d::extension::TableView *table, ssize_t idx) override;
 
-	virtual cocos2d::extension::TableViewCell* tableCellAtIndex(bailin::ui::TableViewEx *table, ssize_t idx) override;
-
-	virtual ssize_t numberOfCellsInTableView(bailin::ui::TableViewEx *table) override;
+	virtual ssize_t numberOfCellsInTableView(cocos2d::extension::TableView *table) override;
 
 	// for TableViewDelegate
 	virtual void tableCellTouched(cocos2d::extension::TableView* table, cocos2d::extension::TableViewCell* cell) override
@@ -38,17 +40,17 @@ return function(DataCache, className)
 	]]
 
 	local tableViewVirtualFunctionsImplement = [[
-void $classname::scrollViewDidScroll( ScrollView* view )
+void $classname::scrollViewDidScroll( extension::ScrollView* view )
 {
 
 }
 
-void $classname::scrollViewDidZoom( ScrollView* view )
+void $classname::scrollViewDidZoom( extension::ScrollView* view )
 {
 
 }
 
-Size $classname::cellSizeForTable( TableViewEx *table )
+Size $classname::cellSizeForTable( TableView *table )
 {
 	// Return a Size with the item size you want to show
 	return Size::ZERO;
@@ -73,7 +75,7 @@ TableViewCell* $classname::tableCellAtIndex( TableView *table, ssize_t idx )
 	return pCell;
 }
 
-ssize_t $classname::numberOfCellsInTableView( TableViewEx *table )
+ssize_t $classname::numberOfCellsInTableView( TableView *table )
 {
 	// TODO: return the counts of TableView
 	return 0;

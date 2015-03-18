@@ -11,6 +11,8 @@ USING_NS_CC_EXT;
 // Add bailin::util namespace
 USING_NS_BL_UTIL;
 
+$customNamespace
+
 using namespace cocos2d::ui;
 using namespace cocosbuilder;
 

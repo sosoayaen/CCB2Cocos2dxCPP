@@ -395,6 +395,7 @@ if file then
 		['$prefixClass'] = "public cocos2d::";	-- 放在继承类前面的描述，比如public或者private等，仅在头文件有效，默认是继承子cocos2d命名空间，如果需要自定义修改则在下面逻辑中判断覆盖
 		['$inheritclass'] = inheritclass;	-- 继承的类
 		['$includeHeader'] = '';	-- 继承的类的头文件包含，自定义的头文件需要在这里包含，如果是cocos的类，则不需要指明加载对应的头文件
+		['$customNamespace'] = '';	-- cpp中，自定的一些命名空间
 		['$publicVirtualFunctionsDeclare'] = "";	-- 继承类的虚函数声明(public)
 		['$privateVirtualFunctionsDeclare'] = "";	-- 继承类的虚函数声明(private)
 		['$protectedVirtualFunctionsDeclare'] = "";	-- 继承类的虚函数声明(protected)
