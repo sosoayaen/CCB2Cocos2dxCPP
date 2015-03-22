@@ -39,6 +39,30 @@ return function(DataCache, className)
 	virtual void tableCellTouchedWithTouch(bailin::ui::TableViewEx* table, cocos2d::extension::TableViewCell* cell, cocos2d::Touch* touch) override;
 	]]
 
+	-- 增加表格初始化私有函数
+	local initTableViewControlDeclare = [[
+	/**
+	 * @brief create the tableviewex control
+	 */
+	void initTableViewControl();
+	]]
+	DataCache['$privateVirtualFunctionsDeclare'] = DataCache['$privateVirtualFunctionsDeclare'] .. initTableViewControlDeclare
+
+	local initTableViewImplement = [[
+void %s::initTableViewControl()
+{
+	// TODO: create instance of tableviewex
+}
+	]]
+	DataCache['$privateFunctionImplement'] = DataCache['$privateFunctionImplement'] .. string.format(initTableViewImplement, className)
+
+	local initTableViewControlCall = [[
+		// call init tableview control Method
+		initTableViewControl();
+	]]
+	-- 增加初始化的调用
+	DataCache['$initCallMethod'] = DataCache['$initCallMethod'] .. initTableViewControlCall
+
 	local tableViewVirtualFunctionsImplement = [[
 void $classname::scrollViewDidScroll( extension::ScrollView* view )
 {

@@ -57,6 +57,7 @@ bool $classname::init()
 		// init menu control
 		initMenuControl();
 
+$initCallMethod
 		// TODO: other init here
 
 		bRet = true;
@@ -91,6 +92,8 @@ bool $classname::onAssignCCBMemberVariable( Ref* pTarget, const char* pMemberVar
 $bindMemberVariable
 	return true;
 }
+
+$privateFunctionImplement
 
 $virtualFunctionsImplement
 

@@ -273,6 +273,8 @@ if file then
 		['$includeHeader'] = "";	-- 继承的类的头文件包含，自定义的头文件需要在这里包含
 		['$virtualFunctions'] = "";	-- 初始化虚函数，比如DialogLayer::initDialog();
 		['$memberInit'] = table.concat(initCodeTbl);	-- 初始化代码
+		['$privateVirtualFunctionsDeclare'] = "";	-- 私有函数声明
+		['$privateFunctionImplement'] = "";		-- 私有函数实现
 				
 		['$bindMemberVariableDeclare'] = table.concat(memberVariableDeclareTbl);	-- 成员变量定义
 		['$bindMemberVariable'] = table.concat(memberVariableBindTbl);	-- 成员变量绑定

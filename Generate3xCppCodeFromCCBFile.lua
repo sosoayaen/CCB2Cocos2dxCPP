@@ -399,9 +399,12 @@ if file then
 		['$publicVirtualFunctionsDeclare'] = "";	-- 继承类的虚函数声明(public)
 		['$privateVirtualFunctionsDeclare'] = "";	-- 继承类的虚函数声明(private)
 		['$protectedVirtualFunctionsDeclare'] = "";	-- 继承类的虚函数声明(protected)
+		['$privateFunctionImplement'] = "";		-- 私有函数实现
 		['$virtualFunctionsImplement'] = "";	-- 虚函数的实现
 		['$bindMemberVariableDeclare'] = table.concat(memberVariableDeclareTbl);	-- 成员变量定义
 		['$bindMemberVariable'] = table.concat(memberVariableBindTbl);	-- 成员变量绑定
+
+		['$initCallMethod'] = ""; -- 初始化init中在载入ccbi后的调用区域，可以写自己的函数调用
 		
 		['$bindMenuSelectorDeclare'] = table.concat(menuSelectorDeclareTbl);	-- 菜单回调函数定义
 		['$bindMenuSelector'] = table.concat(menuSelectorBindTbl);	-- 菜单回调函数绑定
