@@ -53,7 +53,7 @@ local contentBaseLayerFunc = function(Cache, inheritClassName, className)
 	-- ContentBaseLayer 是和项目相关的，仅仅在三国挂机项目中有效，所以没有定义工具类的命名空间
 	Cache['$prefixClass'] = 'public '
 	-- ContentBaseLayer需要子类实现一个重排布的函数
-	Cache['$protectedVirtualFunctionsDeclare'] = '\tvirtual bool reLayout() override;\n'
+	Cache['$protectedVirtualFunctionsDeclare'] = '\tvirtual void reLayout() override;\n'
 	-- 重新布局的实现函数
 	local reLayoutImplement = [[
 void %s::reLayout()
