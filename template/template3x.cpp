@@ -54,6 +54,8 @@ bool $classname::init()
         
         pCCBReader->release();
 
+		ControlUtil::fitFontSize(pNode);
+
 		// init menu control
 		initMenuControl();
 

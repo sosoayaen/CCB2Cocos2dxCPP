@@ -65,11 +65,21 @@ void %s::reLayout()
 	appendVirtualFunctionsImplment(Cache, string.format(reLayoutImplement, className))
 end
 
+-- @class BailinBaseLayer 处理函数
+-- @param Cache
+local bailinBaseLayerFunc = function(Cache, inheritClassName, className)
+	-- 通用处理
+	commonHandleFunc(Cache, inheritClassName, className)
+	-- BailinBaseLayer 在命名空间 bailin::ui 下
+	Cache['$prefixClass'] = 'public bailin::ui::'
+end
+
 -- 继承处理表格，key为特殊的继承类类名，value为处理函数
 local inheritClassHandle =
 {
 	['DialogLayer'] = dialogLayerHandleFunc,
 	['ContentBaseLayer'] = contentBaseLayerFunc,
+	['BailinBaseLayer'] = bailinBaseLayerFunc,
 }
 
 -- 返回的处理函数，只需要把类名作为参数传入即可，如果匹配处理了就返回true，否则返回false

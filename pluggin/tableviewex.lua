@@ -12,13 +12,6 @@ return function(DataCache, className)
 	-- 虚函数在头文件的声明
 	DataCache['$inheritByTableViewVirtualFunctionDeclare'] = [[
 	//////////////////////////////////////////////////////////////////////////
-	// ScrollViewDelegate virtual function
-	//////////////////////////////////////////////////////////////////////////
-	virtual void scrollViewDidScroll(cocos2d::extension::ScrollView* view) override;
-
-	virtual void scrollViewDidZoom(cocos2d::extension::ScrollView* view) override;
-
-	//////////////////////////////////////////////////////////////////////////
 	// TableViewDelegate virtual function
 	//////////////////////////////////////////////////////////////////////////
 	virtual cocos2d::Size cellSizeForTable(cocos2d::extension::TableView *table) override;
@@ -64,16 +57,6 @@ void %s::initTableViewControl()
 	DataCache['$initCallMethod'] = DataCache['$initCallMethod'] .. initTableViewControlCall
 
 	local tableViewVirtualFunctionsImplement = [[
-void $classname::scrollViewDidScroll( extension::ScrollView* view )
-{
-
-}
-
-void $classname::scrollViewDidZoom( extension::ScrollView* view )
-{
-
-}
-
 Size $classname::cellSizeForTable( TableView *table )
 {
 	// Return a Size with the item size you want to show
