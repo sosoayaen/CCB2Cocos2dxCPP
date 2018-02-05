@@ -50,10 +50,10 @@ end)
 
 -- table.foreach(cmdTbl, print)
 
-local filename = FILENAME or cmdTbl['-f'] or cmdTbl['--filename']
+local filename = FILENAME or cmdTbl['-f'] or cmdTbl['--filename'] or ''
 -- 文件名先判断下是否是根目录，如果是根目录就是绝对路径
 -- 如果是相对路径则加上配置的目录
-if string.match(filename or '', '[^/\\]') then
+if not string.match(filename or '', '^/') then
 	filename = (defaultConfig.source_directory or '') .. filename
 end
 
@@ -99,11 +99,15 @@ lua %s -f filename -c classname [-o outputfilename] [-p outputpath] [-i inheritc
   --sa	If this parameter is set, the "keyBackClicked" and "keyMenuClicked" function will be generated in code. It only supply in Android / Win32
   --stv If this parameter is set, the code will support CCTableView and auto generate some virtual function in code to operate CCTableView
 ]]
+
 -- 解析帮助
 if cmdTbl['-h'] or cmdTbl['--help'] then
 	showlog(string.format(helpTxt, arg[0]))
 	return
 end
+
+showlog('******************************')
+showlog('***** CCB Generate Start *****')
 
 -- 校验输入ccb文件名
 if not filename or filename == "" then
@@ -114,11 +118,13 @@ end
 
 showlog('==================================')
 -- 读取默认的配置文件
-showlog('Default config infomation')
+showlog('Default config information')
 showlog('i.   Source directory:')
 showlog(string.format('     %s', defaultConfig.source_directory or 'nil'))
 showlog('ii.  Output directory:')
 showlog(string.format('     %s', defaultConfig.output_directory or 'nil'))
+showlog('==================================')
+showlog('Parameter information')
 -- 提示对应输入的参数
 showlog(string.format('1. Source file is [%s]', filename))
 -- 类名
@@ -183,6 +189,7 @@ if file then
 					local newBaseClass = {}
 					newBaseClass.baseClass = (baseClassConfig and baseClassConfig.baseClass) or baseClass
 					newBaseClass.nameSpace = (baseClassConfig and baseClassConfig.nameSpace) or 'cocos2d'
+					newBaseClass.bindNameSpace = (baseClassConfig and baseClassConfig.bindNameSpace) or ''
 					table.insert(baseClassNestTbl, newBaseClass)
 				else
 					error("baseClass could not be nil or empty string!")
@@ -218,6 +225,7 @@ if file then
 
 						member.baseClass = baseClassConfig.baseClass
 						member.nameSpace = baseClassConfig.nameSpace
+						member.bindNameSpace = baseClassConfig.bindNameSpace
 						--[[
 						showlog('---==MEMBER CONTENT==---')
 						table.foreach(member, print)
@@ -317,10 +325,15 @@ if file then
 
 				table.insert(memberVariableDeclareTbl, string.format('\t// %s\n\t%s::%s* %s = nullptr;\n', member.comment, member.nameSpace, member.baseClass, member.name));
 				
+				local className = member.baseClass;
+				-- 增加额外的绑定命名空间
+				if member.bindNameSpace ~= nil and member.bindNameSpace ~= '' then
+					className = member.bindNameSpace .. '::' .. className
+				end
 				-- 生成绑定成员代码
 				table.insert(memberVariableBindTbl,
 					string.format('\tCCB_MEMBERVARIABLEASSIGNER_GLUE_WEAK(this, "%s", %s*, this->%s);\n',
-					member.name, member.baseClass, member.name));
+					member.name, className, member.name));
 			else
 				-- 把重复的记录下来，输出到最终日志中
 				duplicateVariableNameTbl[member.name] = (duplicateVariableNameTbl[member.name] or 0) + 1
