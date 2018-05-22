@@ -4,6 +4,8 @@ package.path = package.path .. ';.\\?.lua;'
 -- 加载外部的配置脚本
 require 'config3x'
 
+-- local lfs = require('lfs')
+
 -- 加载插件继承类脚本
 local inheritClassHanleFunc = require 'pluggin.inherit'
 -- 加载插件tableviewex
@@ -78,6 +80,9 @@ local inheritclass = INHERITCLASS or cmdTbl['-i'] or cmdTbl['--inheritclass'] or
 local supportAndroidMenuReturn = SUPPORT_ANDROID_MENU_RETURN or cmdTbl['--sa'] or cmdTbl['--supportandroidmenu']
 local dir = DIR or '';
 local useTableView = USETABLEVIEW or cmdTbl['--stv'] or cmdTbl['--usetableview'] -- 设置是否继承自CCTableView
+
+-- 特殊模板后缀
+local templateClass = cmdTbl['-t'];
 
 local showlog = showlog or function(pattern, ...)
 	print(string.format(pattern, unpack(arg or {})))
@@ -409,6 +414,7 @@ if file then
 		['$inheritclass'] = inheritclass;	-- 继承的类
 		['$includeHeader'] = '';	-- 继承的类的头文件包含，自定义的头文件需要在这里包含，如果是cocos的类，则不需要指明加载对应的头文件
 		['$customNamespace'] = '';	-- cpp中，自定的一些命名空间
+		['$privateAttributesVariable'] = "";	-- 私有变量声明
 		['$publicVirtualFunctionsDeclare'] = "";	-- 继承类的虚函数声明(public)
 		['$privateVirtualFunctionsDeclare'] = "";	-- 继承类的虚函数声明(private)
 		['$protectedVirtualFunctionsDeclare'] = "";	-- 继承类的虚函数声明(protected)
@@ -475,6 +481,14 @@ void %s::keyMenuClicked( void )
 	end
 
 	--[[
+		判断下文件夹是否存在，不存在就创建
+	]]
+	if lfs then
+		do end
+	else
+		os.execute("mkdir -p " .. outputpath)
+	end
+	--[[
 		这里开始生成头文件
 	]]
 	showlog("++++++++++ Generate sample data file [%s.h]", outputfilename);
@@ -484,7 +498,14 @@ void %s::keyMenuClicked( void )
 	local hfile = io.open(hfilename, 'w+b');
 	if hfile then
 		-- 载入头文件模板
-		local templatehfile = io.open(dir .. 'template/template3x.h', 'r+b');
+		local thf = 'template/template3x'
+		if (templateClass) then
+			thf = thf .. '_' .. templateClass .. '.h'
+		else
+			thf = thf .. '.h'
+		end
+		
+		local templatehfile = io.open(dir .. thf, 'r+b');
 --		error(tostring(templatehfile))
 		local templatehdata = nil;
 		if templatehfile then
@@ -513,8 +534,14 @@ void %s::keyMenuClicked( void )
 	local cppfilename = outputpath .. outputfilename .. ".cpp";
 	local cppfile = io.open(cppfilename, 'w+b');
 	if cppfile then
+		local tsf = 'template/template3x'
+		if (templateClass) then
+			tsf = tsf .. '_' .. templateClass .. '.cpp'
+		else
+			tsf = tsf .. '.cpp'
+		end
 		-- 载入源文件模板
-		local templatecppfile = io.open(dir .. 'template/template3x.cpp', 'r+b');
+		local templatecppfile = io.open(dir .. tsf, 'r+b');
 		local templatecppdata = nil;
 		if templatecppfile then
 			templatecppdata = templatecppfile:read('*a');

@@ -29,7 +29,9 @@ classChange3xConfig =
 	-- 九宫格图片
 	['CCScale9Sprite'] = {
 		baseClass = 'Scale9Sprite',
-		nameSpace = 'cocos2d::ui'
+		nameSpace = 'cocos2d::ui',
+		-- 绑定变量的时候的额外的前缀
+		bindNameSpace = "ui"
 	},
 	-- 精灵图片
 	['CCSprite'] = {
@@ -76,7 +78,7 @@ InheritClass =
 defaultConfig =
 {
 	-- 源文件夹，设置了此数据后，可以只输入文件名，自己会搜索这个目录下的文件
-	['source_directory'] = '/Users/mac/Documents/bailin/guaji-sango/ccb/Resources/',
+	['source_directory'] = '/Users/mac/Documents/bailin/projects/guaji-sango/ccb/Resources/',
 	-- 输出文件夹
-	['output_directory'] = '/Users/mac/Documents/bailin/guaji-sango/frameworks/runtime-src/Classes/scene/town/',
+	['output_directory'] = '/Users/mac/Documents/bailin/projects/guaji-sango/frameworks/runtime-src/Classes/scene/dialog/JifenDuihuanDialog/'
 }

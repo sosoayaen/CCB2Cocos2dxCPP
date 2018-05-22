@@ -5,8 +5,7 @@
 * Date: $DATE
 */
 
-#ifndef __$CLASSNAME__H__
-#define __$CLASSNAME__H__
+#pragma once
 
 #include "cocos2d.h"
 #include "cocos-ext.h"
@@ -34,6 +33,10 @@ private:
 $bindMemberVariableDeclare
 
 private:
+	// Attributes
+$privateAttributesVariable
+
+private:
 	// Init Menu
 	void initMenuControl();
 
@@ -52,5 +55,3 @@ $inheritByTableViewVirtualFunctionDeclare
 public:
 	// Funcitons
 };
-
-#endif // __$CLASSNAME__H__

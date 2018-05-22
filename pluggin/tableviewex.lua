@@ -9,6 +9,15 @@ return function(DataCache, className)
 	DataCache['$includeHeader'] = DataCache['$includeHeader'] .. '\n#include "bailinUi.h"'
 	DataCache['$customNamespace'] = DataCache['$customNamespace'] .. '\nUSING_NS_BL_UI;'
 
+	-- 预定义的变量，cell 的大小和对应的 tableview 变量
+	local tableview_variable = [[
+	// size of cell
+	cocos2d::Size m_sizeCell;
+	// tableview
+	bailin::ui::TableViewEx* m_pTableView = nullptr;
+	]]
+	DataCache['$privateAttributesVariable'] = DataCache['$privateAttributesVariable'] .. '\n' .. tableview_variable 
+
 	-- 虚函数在头文件的声明
 	DataCache['$inheritByTableViewVirtualFunctionDeclare'] = [[
 	//////////////////////////////////////////////////////////////////////////
@@ -38,14 +47,29 @@ return function(DataCache, className)
 	 * @brief create the tableviewex control
 	 */
 	void initTableViewControl();
+
+	/**
+	 * @brief generate the cell node
+	 */
+	cocos2d::Node* generateCellNode(ssize_t idx);
 	]]
 	DataCache['$privateVirtualFunctionsDeclare'] = DataCache['$privateVirtualFunctionsDeclare'] .. initTableViewControlDeclare
 
 	local initTableViewImplement = [[
 void %s::initTableViewControl()
 {
+	// FIXME: set the cell size
+	m_sizeCell = Size::ZERO;
+
 	// TODO: create instance of tableviewex
+	// const auto& sizeView = m_pLayerTableviewContainer->getContentSize();
+	// m_pTableView = TableViewEx::create(this, sizeView);
+	// m_pTableView->setDelegate(this);
+	// m_pLayerTableviewContainer->addChild(m_pTableView);
+	// m_pTableView->setDirection(cocos2d::extension::ScrollView::Direction::VERTICAL);
+	// m_pTableView->reloadData();
 }
+
 	]]
 	DataCache['$privateFunctionImplement'] = DataCache['$privateFunctionImplement'] .. string.format(initTableViewImplement, className)
 
@@ -60,14 +84,18 @@ void %s::initTableViewControl()
 Size $classname::cellSizeForTable( TableView *table )
 {
 	// Return a Size with the item size you want to show
-	return Size::ZERO;
+	return m_sizeCell;
+}
+
+Node* $classname::generateCellNode(ssize_t idx)
+{
+	// TODO: generate the cell node with idx of data source
+	//       Add some control to the Cell like Sprite and so on ...
 }
 
 TableViewCell* $classname::tableCellAtIndex( TableView *table, ssize_t idx )
 {
 	TableViewCell* pCell = table->dequeueCell();
-
-	bool bCreateCell = false;
 
 	if (!pCell)
 	{
@@ -77,7 +105,17 @@ TableViewCell* $classname::tableCellAtIndex( TableView *table, ssize_t idx )
 
 	if (pCell)
 	{
-		// TODO: Add some control to the Cell like Sprite and so on ...
+		// clear all children
+		pCell->removeAllChildren();
+
+		// generate the cell node
+		auto pCellNode = generateCellNode(idx);
+
+		// add node to cell in middle of rectangle
+		pCellNode->setAnchorPoint(Vec2::ANCHOR_MIDDLE);
+		pCellNode->setPosition(m_sizeCell * 0.5f);
+		pCell->addChild(pCellNode);
+
 	}
 	return pCell;
 }
@@ -90,7 +128,7 @@ ssize_t $classname::numberOfCellsInTableView( TableView *table )
 
 void $classname::tableCellTouchedWithTouch(bailin::ui::TableViewEx* table, cocos2d::extension::TableViewCell* cell, cocos2d::Touch* touch)
 {
-	Point pt = cell->convertToNodeSpace(touch->getLocation());
+	cocos2d::Point pt = cell->convertToNodeSpace(touch->getLocation());
 
 	// TODO: Get the point in cell, you can judge which element touched
 }
